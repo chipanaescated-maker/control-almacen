@@ -1,139 +1,1719 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Almacén Privado</title>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 20px; }
-    .pantalla-bloqueo { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
-    .contenedor { max-width: 900px; margin: 0 auto; background-color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; }
-    h1 { color: #1f2937; text-align: center; }
-    .formulario { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    input { padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; flex-grow: 1; outline: none; }
-    button { padding: 12px 20px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .btn-entrar { background-color: #111827; width: 200px; margin-top: 10px; }
-    .btn-agregar { background-color: #059669; }
-    .btn-accion { background-color: #3b82f6; padding: 8px 12px; margin: 2px; }
-    .btn-borrar { background-color: #ef4444; padding: 8px 12px; margin: 2px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e5e7eb; }
-    th { background-color: #f9fafb; color: #4b5563; }
-    @media (max-width: 600px) {
-      .formulario { flex-direction: column; }
-      th, td { padding: 8px; font-size: 14px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HydroStock · Sistema de Inventario Hidropónico</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root {
+    --bg: #06110d;
+    --bg-2: #0a1c16;
+    --surface: #0f2620;
+    --surface-2: #143028;
+    --surface-3: #1a3a30;
+    --border: rgba(0, 217, 126, 0.12);
+    --border-hover: rgba(0, 217, 126, 0.35);
+    --accent: #00d97e;
+    --accent-2: #00b8d4;
+    --accent-3: #7cffb3;
+    --warning: #ffb84d;
+    --danger: #ff5e6c;
+    --fg: #e8f5e9;
+    --muted: #8aae9f;
+    --muted-2: #4a7065;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-feature-settings: "ss01", "cv01";
+  }
+  .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+  
+  /* Fondo decorativo */
+  .bg-mesh {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 15% 0%, rgba(0, 217, 126, 0.12), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 85% 100%, rgba(0, 184, 212, 0.10), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(124, 255, 179, 0.04), transparent 70%),
+      var(--bg);
+  }
+  .bg-grid {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.4;
+    background-image:
+      linear-gradient(rgba(0, 217, 126, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 217, 126, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent 80%);
+  }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg-2); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+  
+  /* Sidebar */
+  .sidebar {
+    background: linear-gradient(180deg, rgba(15, 38, 32, 0.85), rgba(10, 28, 22, 0.85));
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border);
+  }
+  .nav-item {
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-item::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 3px; height: 0; background: var(--accent); border-radius: 0 4px 4px 0;
+    transition: height 0.25s ease;
+  }
+  .nav-item.active::before { height: 24px; }
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(0, 217, 126, 0.15), transparent);
+    color: var(--accent);
+  }
+  .nav-item:hover:not(.active) {
+    background: rgba(0, 217, 126, 0.06);
+    color: var(--accent-3);
+  }
+  
+  /* Cards */
+  .card {
+    background: linear-gradient(135deg, rgba(15, 38, 32, 0.7), rgba(20, 48, 40, 0.5));
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+  .card:hover { border-color: var(--border-hover); }
+  
+  /* Stat cards */
+  .stat-card {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    transition: all 0.3s ease;
+  }
+  .stat-card::after {
+    content: ''; position: absolute; top: -50%; right: -30%;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, var(--glow, rgba(0, 217, 126, 0.15)), transparent 70%);
+    pointer-events: none;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
+  
+  /* Buttons */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #00b86b);
+    color: #06110d;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 10px 18px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0, 217, 126, 0.25);
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(0, 217, 126, 0.4); }
+  .btn-primary:active { transform: translateY(0); }
+  
+  .btn-ghost {
+    background: rgba(0, 217, 126, 0.08);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-ghost:hover { background: rgba(0, 217, 126, 0.15); border-color: var(--border-hover); }
+  
+  .btn-danger {
+    background: rgba(255, 94, 108, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(255, 94, 108, 0.2);
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .btn-danger:hover { background: rgba(255, 94, 108, 0.2); }
+  
+  /* Inputs */
+  .input, .select, .textarea {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--fg);
+    width: 100%;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  .input:focus, .select:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 217, 126, 0.15);
+  }
+  .input::placeholder, .textarea::placeholder { color: var(--muted-2); }
+  .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300d97e' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .badge-success { background: rgba(0, 217, 126, 0.15); color: var(--accent); border: 1px solid rgba(0, 217, 126, 0.25); }
+  .badge-warning { background: rgba(255, 184, 77, 0.15); color: var(--warning); border: 1px solid rgba(255, 184, 77, 0.25); }
+  .badge-danger { background: rgba(255, 94, 108, 0.15); color: var(--danger); border: 1px solid rgba(255, 94, 108, 0.25); }
+  .badge-info { background: rgba(0, 184, 212, 0.15); color: var(--accent-2); border: 1px solid rgba(0, 184, 212, 0.25); }
+  
+  /* Tables */
+  .table-row { transition: background 0.15s ease; }
+  .table-row:hover { background: rgba(0, 217, 126, 0.04); }
+  
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(6, 17, 13, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: linear-gradient(135deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--border-hover);
+    border-radius: 20px;
+    width: 100%; max-width: 580px;
+    max-height: 90vh; overflow-y: auto;
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 217, 126, 0.1);
+  }
+  .modal-backdrop.active .modal { transform: scale(1) translateY(0); }
+  
+  /* Toast */
+  .toast-container {
+    position: fixed; bottom: 20px; right: 20px; z-index: 200;
+    display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none;
+  }
+  .toast {
+    background: linear-gradient(135deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--border-hover);
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--fg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    min-width: 280px; max-width: 360px;
+    transform: translateX(120%);
+    animation: toastIn 0.3s ease forwards;
+    pointer-events: auto;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .toast.toast-error { border-left-color: var(--danger); }
+  .toast.toast-warning { border-left-color: var(--warning); }
+  @keyframes toastIn { to { transform: translateX(0); } }
+  @keyframes toastOut { to { transform: translateX(120%); opacity: 0; } }
+  
+  /* Animaciones */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 0.4s ease forwards; }
+  
+  @keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+  }
+  .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+  
+  /* Mobile */
+  @media (max-width: 1024px) {
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; width: 260px !important; }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 49; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
+  }
+  
+  /* Chart container */
+  .chart-wrap { position: relative; height: 280px; }
+  
+  /* Progress bar */
+  .progress { height: 6px; background: rgba(0, 217, 126, 0.1); border-radius: 999px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-3)); border-radius: 999px; transition: width 0.5s ease; }
+  
+  /* Floating action */
+  .fab {
+    position: fixed; bottom: 24px; right: 24px; z-index: 40;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #00b86b);
+    color: #06110d; font-size: 24px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 30px rgba(0, 217, 126, 0.4);
+    cursor: pointer; border: none;
+    transition: all 0.2s ease;
+  }
+  .fab:hover { transform: scale(1.08) rotate(90deg); }
+  @media (min-width: 1024px) { .fab { display: none; } }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state i { font-size: 56px; color: var(--muted-2); margin-bottom: 16px; }
+  
+  /* Search */
+  .search-wrap { position: relative; }
+  .search-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted-2); }
+  .search-wrap .input { padding-left: 40px; }
+  
+  /* Tab pills */
+  .tab-pill {
+    padding: 8px 16px; border-radius: 10px;
+    background: transparent; color: var(--muted);
+    font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+    border: 1px solid transparent;
+    font-size: 13px;
+  }
+  .tab-pill.active { background: rgba(0, 217, 126, 0.12); color: var(--accent); border-color: rgba(0, 217, 126, 0.25); }
+  .tab-pill:hover:not(.active) { color: var(--accent-3); background: rgba(0, 217, 126, 0.05); }
+  
+  /* Hide scrollbar horizontal */
+  .scroll-x { overflow-x: auto; }
+  .scroll-x::-webkit-scrollbar { height: 6px; }
+  
+  /* Logo */
+  .logo-mark {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #06110d; font-size: 20px;
+    box-shadow: 0 4px 20px rgba(0, 217, 126, 0.3);
+  }
+  
+  /* Currency toggle */
+  .currency-toggle {
+    display: inline-flex; background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 3px;
+  }
+  .currency-toggle button {
+    padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
+    background: transparent; color: var(--muted); border: none; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .currency-toggle button.active { background: var(--accent); color: #06110d; }
+</style>
 </head>
 <body>
 
-  <!-- PANTALLA DE SEGURIDAD -->
-  <div id="pantalla-bloqueo" class="pantalla-bloqueo">
-    <h2>Acceso Restringido</h2>
-    <input type="password" id="pin-acceso" placeholder="Ingresa tu clave secreta">
-    <button class="btn-entrar" onclick="verificarAcceso()">Entrar al Sistema</button>
-  </div>
-
-  <!-- SISTEMA DE INVENTARIO -->
-  <div id="sistema-inventario" class="contenedor">
-    <h1>Inventario en Tiempo Real</h1>
-    
-    <div class="formulario">
-      <input type="text" id="nombre-producto" placeholder="Ej: Micronutrientes (gramos)...">
-      <input type="number" id="cantidad-producto" placeholder="Stock" style="max-width: 150px;">
-      <button class="btn-agregar" id="btn-guardar">Agregar Producto</button>
+<!-- PANTALLA DE SEGURIDAD (CON DISEÑO OSCURO) -->
+<div id="pantalla-bloqueo" class="fixed inset-0 z-[999] bg-[var(--bg)] flex flex-col items-center justify-center p-4">
+  <div class="card p-8 w-full max-w-sm text-center">
+    <div class="logo-mark mx-auto mb-4 scale-125">
+      <i class="fa-solid fa-seedling"></i>
     </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Stock Actual</th>
-          <th>Control</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-productos">
-        <!-- Los datos de la nube aparecerán aquí -->
-      </tbody>
-    </table>
+    <h2 class="font-display font-bold text-2xl mb-2 text-[var(--fg)]">Acceso Restringido</h2>
+    <p class="text-[var(--muted)] text-sm mb-6">Ingresa tu clave de operaciones</p>
+    <input type="password" id="pin-acceso" class="input text-center text-xl mb-4 tracking-widest text-white" placeholder="••••">
+    <button class="btn-primary w-full" onclick="verificarAcceso()">Entrar al Sistema</button>
   </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set, remove, update } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+<div class="bg-mesh"></div>
+<div class="bg-grid"></div>
 
-    // ESTAS SON TUS LLAVES REALES
-    const firebaseConfig = {
-      apiKey: "AIzaSyAayaAD_7oTb5xBeX-Z0pAXR1yxqnk53-k",
-      authDomain: "hidrohuerto-control-almacen.firebaseapp.com",
-      databaseURL: "https://hidrohuerto-control-almacen-default-rtdb.firebaseio.com",
-      projectId: "hidrohuerto-control-almacen",
-      storageBucket: "hidrohuerto-control-almacen.firebasestorage.app",
-      messagingSenderId: "464478782607",
-      appId: "1:464478782607:web:c1d804fc1932109ec25cfa"
-    };
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const almacenRef = ref(db, 'inventario');
+<div class="flex min-h-screen">
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-64 flex-shrink-0 flex flex-col" id="sidebar">
+    <div class="p-5 flex items-center gap-3 border-b border-[var(--border)]">
+      <div class="logo-mark">
+        <i class="fa-solid fa-seedling"></i>
+      </div>
+      <div>
+        <div class="font-display font-bold text-lg leading-tight">HydroStock</div>
+        <div class="text-[10px] text-[var(--muted)] uppercase tracking-widest">Inventario Premium</div>
+      </div>
+    </div>
+    
+    <nav class="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
+      <button class="nav-item active w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="dashboard" onclick="navigate('dashboard')">
+        <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+      </button>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="inventory" onclick="navigate('inventory')">
+        <i class="fa-solid fa-boxes-stacked w-5"></i> Inventario
+      </button>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="suppliers" onclick="navigate('suppliers')">
+        <i class="fa-solid fa-truck-field w-5"></i> Proveedores
+      </button>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="purchases" onclick="navigate('purchases')">
+        <i class="fa-solid fa-cart-shopping w-5"></i> Compras
+      </button>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="sales" onclick="navigate('sales')">
+        <i class="fa-solid fa-money-bill-trend-up w-5"></i> Ventas
+      </button>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="categories" onclick="navigate('categories')">
+        <i class="fa-solid fa-tags w-5"></i> Categorías
+      </button>
+    </nav>
+    
+    <div class="p-4 border-t border-[var(--border)]">
+      <div class="card p-3 text-xs">
+        <div class="flex items-center gap-2 text-[var(--accent)] mb-1">
+          <span class="w-2 h-2 rounded-full bg-[var(--accent)] pulse-dot"></span>
+          <span class="font-bold">Datos en la Nube</span>
+        </div>
+        <div class="text-[var(--muted)]" id="storageSize">Conectando a Firebase...</div>
+      </div>
+    </div>
+  </aside>
 
-    document.getElementById('btn-guardar').addEventListener('click', () => {
-      const nombre = document.getElementById('nombre-producto').value;
-      const cantidad = document.getElementById('cantidad-producto').value;
-      
-      if(nombre !== "" && cantidad !== "") {
-        const nuevoProducto = push(almacenRef);
-        set(nuevoProducto, { nombre: nombre, stock: parseInt(cantidad) });
-        document.getElementById('nombre-producto').value = '';
-        document.getElementById('cantidad-producto').value = '';
-      }
-    });
-
-    onValue(almacenRef, (snapshot) => {
-      const tabla = document.getElementById('tabla-productos');
-      tabla.innerHTML = ''; 
-      
-      snapshot.forEach((hijo) => {
-        const id = hijo.key;
-        const producto = hijo.val();
+  <!-- MAIN -->
+  <main class="flex-1 min-w-0">
+    <!-- HEADER -->
+    <header class="sticky top-0 z-30 bg-[rgba(6,17,13,0.8)] backdrop-blur-xl border-b border-[var(--border)] px-4 lg:px-8 py-4">
+      <div class="flex items-center gap-4">
+        <button class="lg:hidden btn-ghost !p-2" onclick="toggleSidebar()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
         
-        const fila = document.createElement('tr');
-        fila.innerHTML = `
-          <td><strong>${producto.nombre}</strong></td>
-          <td style="font-size: 1.2em; font-weight: bold;">${producto.stock}</td>
-          <td>
-            <button class="btn-accion" onclick="modificarStock('${id}', ${producto.stock + 1})">+1</button>
-            <button class="btn-accion" onclick="modificarStock('${id}', ${producto.stock - 1})">-1</button>
-            <button class="btn-borrar" onclick="eliminarProducto('${id}')">X</button>
-          </td>
-        `;
-        tabla.appendChild(fila);
-      });
-    });
-
-    window.modificarStock = function(id, nuevoStock) {
-      update(ref(db, 'inventario/' + id), { stock: nuevoStock });
-    };
-    window.eliminarProducto = function(id) {
-      if(confirm("¿Estás seguro de eliminar este producto?")) {
-        remove(ref(db, 'inventario/' + id));
-      }
-    };
-  </script>
-
-  <script>
-    function verificarAcceso() {
-      const pinIngresado = document.getElementById('pin-acceso').value;
-      const PIN_SECRETO = "7070"; 
+        <div class="flex-1 min-w-0">
+          <h1 class="font-display font-bold text-xl lg:text-2xl truncate" id="pageTitle">Dashboard</h1>
+          <p class="text-xs text-[var(--muted)] truncate" id="pageSubtitle">Resumen general de tu inventario hidropónico</p>
+        </div>
+        
+        <div class="hidden md:flex items-center gap-3">
+          <div class="currency-toggle">
+            <button class="active" data-cur="PEN" onclick="setCurrency('PEN')">S/</button>
+            <button data-cur="USD" onclick="setCurrency('USD')">$</button>
+          </div>
+          <div class="text-xs text-right">
+            <div class="text-[var(--muted)]">Tipo de cambio</div>
+            <div class="font-bold text-[var(--accent)]">1 USD = S/ <span id="exchangeRate">3.75</span></div>
+          </div>
+          <button class="btn-ghost !p-2" onclick="openExchangeModal()" title="Editar tipo de cambio">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+        </div>
+        
+        <button class="btn-primary hidden lg:flex items-center gap-2" onclick="quickAdd()">
+          <i class="fa-solid fa-plus"></i> Agregar
+        </button>
+      </div>
       
-      if (pinIngresado === PIN_SECRETO) {
-        document.getElementById('pantalla-bloqueo').style.display = 'none';
-        document.getElementById('sistema-inventario').style.display = 'block';
-      } else {
-        alert("Clave incorrecta. Acceso denegado.");
-        document.getElementById('pin-acceso').value = '';
-      }
+      <!-- Mobile currency -->
+      <div class="flex md:hidden items-center gap-2 mt-3">
+        <div class="currency-toggle">
+          <button class="active" data-cur="PEN" onclick="setCurrency('PEN')">Soles (S/)</button>
+          <button data-cur="USD" onclick="setCurrency('USD')">Dólares ($)</button>
+        </div>
+        <div class="text-xs text-[var(--muted)]">TC: S/ <span id="exchangeRateMobile">3.75</span></div>
+      </div>
+    </header>
+
+    <!-- VIEWS -->
+    <div class="p-4 lg:p-8" id="viewsContainer">
+      
+      <!-- DASHBOARD -->
+      <section class="view fade-in" id="view-dashboard">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 mb-6">
+          <div class="stat-card" style="--glow: rgba(0, 217, 126, 0.2)">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[rgba(0,217,126,0.15)] flex items-center justify-center text-[var(--accent)]">
+                <i class="fa-solid fa-boxes-stacked"></i>
+              </div>
+              <span class="badge badge-success"><i class="fa-solid fa-arrow-up text-[8px]"></i> Items</span>
+            </div>
+            <div class="text-3xl font-display font-bold" id="statTotalProducts">0</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Productos en inventario</div>
+          </div>
+          
+          <div class="stat-card" style="--glow: rgba(0, 184, 212, 0.2)">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[rgba(0,184,212,0.15)] flex items-center justify-center text-[var(--accent-2)]">
+                <i class="fa-solid fa-coins"></i>
+              </div>
+              <span class="badge badge-info" id="statCurrencyBadge">PEN</span>
+            </div>
+            <div class="text-3xl font-display font-bold" id="statInventoryValue">S/ 0.00</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Valor de inventario</div>
+          </div>
+          
+          <div class="stat-card" style="--glow: rgba(255, 184, 77, 0.2)">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[rgba(255,184,77,0.15)] flex items-center justify-center text-[var(--warning)]">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <span class="badge badge-warning">Alerta</span>
+            </div>
+            <div class="text-3xl font-display font-bold" id="statLowStock">0</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Productos con stock bajo</div>
+          </div>
+          
+          <div class="stat-card" style="--glow: rgba(124, 255, 179, 0.2)">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[rgba(124,255,179,0.15)] flex items-center justify-center text-[var(--accent-3)]">
+                <i class="fa-solid fa-truck-field"></i>
+              </div>
+              <span class="badge badge-success">Activos</span>
+            </div>
+            <div class="text-3xl font-display font-bold" id="statSuppliers">0</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Proveedores registrados</div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+          <div class="card p-5 lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-display font-bold text-lg">Movimientos del mes</h3>
+                <p class="text-xs text-[var(--muted)]">Compras vs Ventas</p>
+              </div>
+              <div class="flex gap-2 text-xs">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[var(--accent-2)]"></span> Compras</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[var(--accent)]"></span> Ventas</span>
+              </div>
+            </div>
+            <div class="chart-wrap"><canvas id="chartMovements"></canvas></div>
+          </div>
+          
+          <div class="card p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-display font-bold text-lg">Por categoría</h3>
+                <p class="text-xs text-[var(--muted)]">Distribución de inventario</p>
+              </div>
+            </div>
+            <div class="chart-wrap"><canvas id="chartCategories"></canvas></div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="card p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-display font-bold text-lg">Productos con stock bajo</h3>
+              <button class="text-xs text-[var(--accent)] font-semibold" onclick="navigate('inventory')">Ver todo →</button>
+            </div>
+            <div id="lowStockList" class="space-y-3"></div>
+          </div>
+          
+          <div class="card p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-display font-bold text-lg">Resumen financiero</h3>
+              <span class="badge badge-info" id="financeBadge">PEN</span>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between text-sm mb-2">
+                  <span class="text-[var(--muted)]">Ingresos por ventas (mes)</span>
+                  <span class="font-bold text-[var(--accent)]" id="financeSales">S/ 0.00</span>
+                </div>
+                <div class="progress"><div class="progress-bar" id="salesBar" style="width: 0%"></div></div>
+              </div>
+              <div>
+                <div class="flex justify-between text-sm mb-2">
+                  <span class="text-[var(--muted)]">Gastos por compras (mes)</span>
+                  <span class="font-bold text-[var(--accent-2)]" id="financePurchases">S/ 0.00</span>
+                </div>
+                <div class="progress"><div class="progress-bar" id="purchasesBar" style="width: 0%; background: linear-gradient(90deg, var(--accent-2))"></div></div>
+              </div>
+              <div class="pt-3 border-t border-[var(--border)]">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-[var(--muted)]">Balance neto</span>
+                  <span class="font-display font-bold text-2xl" id="financeBalance">S/ 0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INVENTARIO -->
+      <section class="view hidden" id="view-inventory">
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar producto..." id="invSearch" oninput="renderInventory()">
+          </div>
+          <select class="select lg:w-56" id="invCategoryFilter" onchange="renderInventory()">
+            <option value="">Todas las categorías</option>
+          </select>
+          <button class="btn-primary flex items-center gap-2 justify-center" onclick="openProductModal()">
+            <i class="fa-solid fa-plus"></i> Nuevo producto
+          </button>
+        </div>
+        
+        <div class="card overflow-hidden">
+          <div class="scroll-x">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-left text-[var(--muted)] text-xs uppercase tracking-wider">
+                  <th class="p-4">Producto</th>
+                  <th class="p-4">Categoría</th>
+                  <th class="p-4 text-center">Stock</th>
+                  <th class="p-4 text-right">Precio</th>
+                  <th class="p-4 text-right">Valor total</th>
+                  <th class="p-4 text-center">Estado</th>
+                  <th class="p-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTable"></tbody>
+            </table>
+          </div>
+          <div id="inventoryEmpty" class="empty-state hidden">
+            <i class="fa-solid fa-box-open"></i>
+            <p class="font-bold text-lg mb-1">No hay productos</p>
+            <p class="text-sm">Agrega tu primer producto al inventario</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROVEEDORES -->
+      <section class="view hidden" id="view-suppliers">
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar proveedor..." id="supSearch" oninput="renderSuppliers()">
+          </div>
+          <button class="btn-primary flex items-center gap-2 justify-center" onclick="openSupplierModal()">
+            <i class="fa-solid fa-plus"></i> Nuevo proveedor
+          </button>
+        </div>
+        <div id="suppliersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="suppliersEmpty" class="empty-state hidden">
+          <i class="fa-solid fa-truck-field"></i>
+          <p class="font-bold text-lg mb-1">No hay proveedores</p>
+          <p class="text-sm">Registra tu primer proveedor</p>
+        </div>
+      </section>
+
+      <!-- COMPRAS -->
+      <section class="view hidden" id="view-purchases">
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar compra..." id="purSearch" oninput="renderPurchases()">
+          </div>
+          <button class="btn-primary flex items-center gap-2 justify-center" onclick="openPurchaseModal()">
+            <i class="fa-solid fa-plus"></i> Registrar compra
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="scroll-x">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-left text-[var(--muted)] text-xs uppercase tracking-wider">
+                  <th class="p-4">Fecha</th>
+                  <th class="p-4">Producto</th>
+                  <th class="p-4">Proveedor</th>
+                  <th class="p-4 text-center">Cantidad</th>
+                  <th class="p-4 text-right">P. Unit.</th>
+                  <th class="p-4 text-right">Total</th>
+                  <th class="p-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="purchasesTable"></tbody>
+            </table>
+          </div>
+          <div id="purchasesEmpty" class="empty-state hidden">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <p class="font-bold text-lg mb-1">No hay compras</p>
+            <p class="text-sm">Registra tu primera compra</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VENTAS -->
+      <section class="view hidden" id="view-sales">
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar venta..." id="saleSearch" oninput="renderSales()">
+          </div>
+          <button class="btn-primary flex items-center gap-2 justify-center" onclick="openSaleModal()">
+            <i class="fa-solid fa-plus"></i> Registrar venta
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="scroll-x">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-left text-[var(--muted)] text-xs uppercase tracking-wider">
+                  <th class="p-4">Fecha</th>
+                  <th class="p-4">Producto</th>
+                  <th class="p-4">Cliente</th>
+                  <th class="p-4 text-center">Cantidad</th>
+                  <th class="p-4 text-right">P. Unit.</th>
+                  <th class="p-4 text-right">Total</th>
+                  <th class="p-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="salesTable"></tbody>
+            </table>
+          </div>
+          <div id="salesEmpty" class="empty-state hidden">
+            <i class="fa-solid fa-money-bill-trend-up"></i>
+            <p class="font-bold text-lg mb-1">No hay ventas</p>
+            <p class="text-sm">Registra tu primera venta</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORÍAS -->
+      <section class="view hidden" id="view-categories">
+        <div class="flex justify-between items-center mb-5">
+          <p class="text-sm text-[var(--muted)]">Gestiona las categorías de tus productos</p>
+          <button class="btn-primary flex items-center gap-2" onclick="openCategoryModal()">
+            <i class="fa-solid fa-plus"></i> Nueva categoría
+          </button>
+        </div>
+        <div id="categoriesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- Floating Action Button (mobile) -->
+<button class="fab" onclick="quickAdd()" aria-label="Agregar">
+  <i class="fa-solid fa-plus"></i>
+</button>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODALES -->
+<div class="modal-backdrop" id="modalProduct">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg" id="productModalTitle">Nuevo producto</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalProduct')">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Nombre del producto *</label>
+        <input type="text" class="input mt-1" id="pName" placeholder="Ej: Micronutriente Quelatado (Gramos)">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Categoría *</label>
+          <select class="select mt-1" id="pCategory"></select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Unidad</label>
+          <select class="select mt-1" id="pUnit">
+            <option value="unidad">Unidad</option>
+            <option value="metro">Metro</option>
+            <option value="kg">Kilogramo</option>
+            <option value="gramo">Gramo</option>
+            <option value="litro">Litro</option>
+            <option value="caja">Caja</option>
+            <option value="paquete">Paquete</option>
+            <option value="rollo">Rollo</option>
+            <option value="galon">Galón</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Stock *</label>
+          <input type="number" min="0" step="any" class="input mt-1" id="pStock" placeholder="0">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Stock mín.</label>
+          <input type="number" min="0" step="any" class="input mt-1" id="pMinStock" placeholder="0">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Moneda</label>
+          <select class="select mt-1" id="pCurrency">
+            <option value="PEN">Soles (S/)</option>
+            <option value="USD">Dólares ($)</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Precio *</label>
+        <input type="number" min="0" step="any" class="input mt-1" id="pPrice" placeholder="0.00">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Descripción</label>
+        <textarea class="textarea mt-1" id="pDesc" rows="2" placeholder="Notas adicionales..."></textarea>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalProduct')">Cancelar</button>
+      <button class="btn-primary flex-1" onclick="saveProduct()">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalSupplier">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg" id="supplierModalTitle">Nuevo proveedor</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalSupplier')">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Nombre contacto *</label>
+          <input type="text" class="input mt-1" id="sName" placeholder="Juan Pérez">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Empresa *</label>
+          <input type="text" class="input mt-1" id="sCompany" placeholder="HidroTech SAC">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Teléfono</label>
+          <input type="tel" class="input mt-1" id="sPhone" placeholder="+51 999 999 999">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Email</label>
+          <input type="email" class="input mt-1" id="sEmail" placeholder="ventas@empresa.com">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Dirección</label>
+        <input type="text" class="input mt-1" id="sAddress" placeholder="Av. Principal 123, Lima">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Productos que ofrece y precios</label>
+        <textarea class="textarea mt-1" id="sProducts" rows="4" placeholder="Ej:&#10;Tubo PVC 4'' - S/ 25.00&#10;Bomba de agua 1HP - $85.00"></textarea>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalSupplier')">Cancelar</button>
+      <button class="btn-primary flex-1" onclick="saveSupplier()">Guardar proveedor</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalPurchase">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg">Registrar compra</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalPurchase')">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Producto *</label>
+        <select class="select mt-1" id="puProduct"></select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Proveedor</label>
+        <select class="select mt-1" id="puSupplier">
+          <option value="">Sin proveedor</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cantidad *</label>
+          <input type="number" min="1" step="any" class="input mt-1" id="puQty" placeholder="0" oninput="calcPurchaseTotal()">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">P. Unit. *</label>
+          <input type="number" min="0" step="any" class="input mt-1" id="puPrice" placeholder="0.00" oninput="calcPurchaseTotal()">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Moneda</label>
+          <select class="select mt-1" id="puCurrency">
+            <option value="PEN">S/</option>
+            <option value="USD">$</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha</label>
+        <input type="date" class="input mt-1" id="puDate">
+      </div>
+      <div class="bg-[var(--bg-2)] border border-[var(--border)] rounded-xl p-4 flex justify-between items-center">
+        <span class="text-sm text-[var(--muted)]">Total:</span>
+        <span class="font-display font-bold text-xl text-[var(--accent)]" id="puTotal">S/ 0.00</span>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalPurchase')">Cancelar</button>
+      <button class="btn-primary flex-1" onclick="savePurchase()">Guardar compra</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalSale">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg">Registrar venta</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalSale')">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Producto *</label>
+        <select class="select mt-1" id="saProduct" onchange="updateSaleStockInfo()"></select>
+      </div>
+      <div id="saStockInfo" class="text-xs text-[var(--muted)] -mt-2"></div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cliente</label>
+        <input type="text" class="input mt-1" id="saClient" placeholder="Nombre del cliente">
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cantidad *</label>
+          <input type="number" min="1" step="any" class="input mt-1" id="saQty" placeholder="0" oninput="calcSaleTotal()">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">P. Unit. *</label>
+          <input type="number" min="0" step="any" class="input mt-1" id="saPrice" placeholder="0.00" oninput="calcSaleTotal()">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Moneda</label>
+          <select class="select mt-1" id="saCurrency">
+            <option value="PEN">S/</option>
+            <option value="USD">$</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha</label>
+        <input type="date" class="input mt-1" id="saDate">
+      </div>
+      <div class="bg-[var(--bg-2)] border border-[var(--border)] rounded-xl p-4 flex justify-between items-center">
+        <span class="text-sm text-[var(--muted)]">Total:</span>
+        <span class="font-display font-bold text-xl text-[var(--accent)]" id="saTotal">S/ 0.00</span>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalSale')">Cancelar</button>
+      <button class="btn-primary flex-1" onclick="saveSale()">Guardar venta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalCategory">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg">Nueva categoría</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalCategory')">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Nombre *</label>
+        <input type="text" class="input mt-1" id="cName" placeholder="Ej: Módulos NFT">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Icono</label>
+        <div class="grid grid-cols-8 gap-2 mt-2" id="iconPicker">
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-tree">🌳</button>
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-seedling">🌱</button>
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-leaf">🍃</button>
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-circle">⚪</button>
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-screwdriver-wrench">🔧</button>
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-droplet">💧</button>
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-warehouse">🏭</button>
+          <button class="aspect-square rounded-lg bg-[var(--bg-2)] border border-[var(--border)] hover:border-[var(--accent)] text-lg" data-icon="fa-flask">🧪</button>
+        </div>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalCategory')">Cancelar</button>
+      <button class="btn-primary flex-1" onclick="saveCategory()">Guardar categoría</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalExchange">
+  <div class="modal" style="max-width: 420px">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg">Tipo de cambio</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalExchange')">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <p class="text-sm text-[var(--muted)]">Define el valor de 1 dólar en soles peruanos. Se usará para conversiones automáticas.</p>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">1 USD =</label>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="text-[var(--accent)] font-bold">S/</span>
+          <input type="number" min="0" step="0.01" class="input" id="exRate" value="3.75">
+        </div>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalExchange')">Cancelar</button>
+      <button class="btn-primary flex-1" onclick="saveExchange()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== SEGURIDAD ==========
+function verificarAcceso() {
+  const pinIngresado = document.getElementById('pin-acceso').value;
+  const PIN_SECRETO = "7070"; 
+  
+  if (pinIngresado === PIN_SECRETO) {
+    document.getElementById('pantalla-bloqueo').style.display = 'none';
+  } else {
+    showToast("Clave incorrecta. Acceso denegado.", "error");
+    document.getElementById('pin-acceso').value = '';
+  }
+}
+
+/* =====================================================
+   HydroStock - Sistema de Inventario Hidropónico
+   Almacenamiento: FIREBASE REALTIME DATABASE ☁️
+   ===================================================== */
+
+const state = {
+  products: [],
+  suppliers: [],
+  purchases: [],
+  sales: [],
+  categories: [],
+  currentCurrency: 'PEN',
+  exchangeRate: 3.75,
+  editingId: null,
+  selectedIcon: 'fa-circle'
+};
+
+const defaultCategories = [
+  { id: 'cat_tubos', name: 'Sistemas y Kits', icon: 'fa-warehouse' },
+  { id: 'cat_semillas', name: 'Semillas', icon: 'fa-seedling' },
+  { id: 'cat_insumos', name: 'Nutrición Vegetal', icon: 'fa-flask' },
+  { id: 'cat_herramientas', name: 'Equipos Técnicos', icon: 'fa-screwdriver-wrench' }
+];
+
+</script>
+
+<!-- ========== FIREBASE INTEGRATION ========== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAayaAD_7oTb5xBeX-Z0pAXR1yxqnk53-k",
+    authDomain: "hidrohuerto-control-almacen.firebaseapp.com",
+    databaseURL: "https://hidrohuerto-control-almacen-default-rtdb.firebaseio.com",
+    projectId: "hidrohuerto-control-almacen",
+    storageBucket: "hidrohuerto-control-almacen.firebasestorage.app",
+    messagingSenderId: "464478782607",
+    appId: "1:464478782607:web:c1d804fc1932109ec25cfa"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const dbRef = ref(db, 'hydrostock_cloud_data');
+
+  window.saveData = function() {
+    try {
+      const dataToSave = {
+        products: state.products,
+        suppliers: state.suppliers,
+        purchases: state.purchases,
+        sales: state.sales,
+        categories: state.categories,
+        exchangeRate: state.exchangeRate,
+        savedAt: new Date().toISOString()
+      };
+      set(dbRef, dataToSave);
+      document.getElementById('storageSize').textContent = 'Conectado a la Nube ☁️';
+      return true;
+    } catch (e) {
+      showToast('Error al guardar en la nube', 'error');
+      return false;
     }
-  </script>
+  };
+
+  onValue(dbRef, (snapshot) => {
+    const cloudData = snapshot.val();
+    if (cloudData) {
+      state.products = cloudData.products || [];
+      state.suppliers = cloudData.suppliers || [];
+      state.purchases = cloudData.purchases || [];
+      state.sales = cloudData.sales || [];
+      state.categories = cloudData.categories || defaultCategories;
+      state.exchangeRate = cloudData.exchangeRate || 3.75;
+      
+      document.getElementById('exchangeRate').textContent = state.exchangeRate.toFixed(2);
+      document.getElementById('exchangeRateMobile').textContent = state.exchangeRate.toFixed(2);
+      document.getElementById('storageSize').textContent = 'Conectado a la Nube ☁️';
+
+      renderDashboard();
+      if (!document.getElementById('view-inventory').classList.contains('hidden')) renderInventory();
+      if (!document.getElementById('view-suppliers').classList.contains('hidden')) renderSuppliers();
+      if (!document.getElementById('view-purchases').classList.contains('hidden')) renderPurchases();
+      if (!document.getElementById('view-sales').classList.contains('hidden')) renderSales();
+      if (!document.getElementById('view-categories').classList.contains('hidden')) renderCategories();
+    } else {
+      state.categories = [...defaultCategories];
+      window.saveData();
+    }
+  });
+</script>
+
+<script>
+// ========== RESTO DE FUNCIONES DE LA APP ==========
+function loadData() {
+  document.getElementById('storageSize').textContent = 'Conectando...';
+}
+
+function updateStorageInfo() {
+  // Manejado por Firebase ahora
+}
+
+function uid() { return 'id_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+
+function formatMoney(amount, currency) {
+  if (currency === 'USD') return '$ ' + Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return 'S/ ' + Number(amount).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function convertCurrency(amount, from, to) {
+  if (from === to) return amount;
+  if (from === 'USD' && to === 'PEN') return amount * state.exchangeRate;
+  if (from === 'PEN' && to === 'USD') return amount / state.exchangeRate;
+  return amount;
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function getCategoryName(id) {
+  const cat = state.categories.find(c => c.id === id);
+  return cat ? cat.name : 'Sin categoría';
+}
+
+function getCategoryIcon(id) {
+  const cat = state.categories.find(c => c.id === id);
+  return cat ? cat.icon : 'fa-tag';
+}
+
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  const icon = type === 'error' ? 'fa-circle-exclamation' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-check';
+  toast.innerHTML = `<i class="fa-solid ${icon} text-[var(--${type === 'success' ? 'accent' : type})]"></i><span class="text-sm">${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+function navigate(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + view).classList.remove('hidden');
+  document.getElementById('view-' + view).classList.add('fade-in');
+  
+  const navBtn = document.querySelector(`[data-view="${view}"]`);
+  if(navBtn) navBtn.classList.add('active');
+  
+  const titles = {
+    dashboard: ['Dashboard', 'Resumen general de tu inventario hidropónico'],
+    inventory: ['Inventario', 'Gestiona tus productos y materiales'],
+    suppliers: ['Proveedores', 'Administra tus contactos y precios'],
+    purchases: ['Compras', 'Registro de compras a proveedores'],
+    sales: ['Ventas', 'Registro de ventas realizadas'],
+    categories: ['Categorías', 'Organiza tus productos por categoría'],
+    sync: ['Sincronización', 'Respalda y comparte tus datos entre dispositivos']
+  };
+  
+  if(titles[view]) {
+    document.getElementById('pageTitle').textContent = titles[view][0];
+    document.getElementById('pageSubtitle').textContent = titles[view][1];
+  }
+  
+  if (view === 'dashboard') renderDashboard();
+  if (view === 'inventory') renderInventory();
+  if (view === 'suppliers') renderSuppliers();
+  if (view === 'purchases') renderPurchases();
+  if (view === 'sales') renderSales();
+  if (view === 'categories') renderCategories();
+  
+  if (window.innerWidth < 1024) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
+function setCurrency(cur) {
+  state.currentCurrency = cur;
+  document.querySelectorAll('[data-cur]').forEach(b => {
+    b.classList.toggle('active', b.dataset.cur === cur);
+  });
+  document.getElementById('statCurrencyBadge').textContent = cur;
+  document.getElementById('financeBadge').textContent = cur;
+  renderDashboard();
+  if (!document.getElementById('view-inventory').classList.contains('hidden')) renderInventory();
+}
+
+function openExchangeModal() {
+  document.getElementById('exRate').value = state.exchangeRate;
+  document.getElementById('modalExchange').classList.add('active');
+}
+
+function saveExchange() {
+  const rate = parseFloat(document.getElementById('exRate').value);
+  if (rate <= 0) { showToast('Tipo de cambio inválido', 'error'); return; }
+  state.exchangeRate = rate;
+  document.getElementById('exchangeRate').textContent = rate.toFixed(2);
+  document.getElementById('exchangeRateMobile').textContent = rate.toFixed(2);
+  if (window.saveData) window.saveData();
+  closeModal('modalExchange');
+  showToast('Tipo de cambio actualizado');
+  renderDashboard();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  state.editingId = null;
+}
+
+function quickAdd() { openProductModal(); }
+
+function openProductModal(id = null) {
+  state.editingId = id;
+  const select = document.getElementById('pCategory');
+  select.innerHTML = state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  
+  if (id) {
+    const p = state.products.find(x => x.id === id);
+    if (p) {
+      document.getElementById('productModalTitle').textContent = 'Editar producto';
+      document.getElementById('pName').value = p.name;
+      document.getElementById('pCategory').value = p.category;
+      document.getElementById('pUnit').value = p.unit || 'unidad';
+      document.getElementById('pStock').value = p.stock;
+      document.getElementById('pMinStock').value = p.minStock || 0;
+      document.getElementById('pCurrency').value = p.currency || 'PEN';
+      document.getElementById('pPrice').value = p.price;
+      document.getElementById('pDesc').value = p.description || '';
+    }
+  } else {
+    document.getElementById('productModalTitle').textContent = 'Nuevo producto';
+    document.getElementById('pName').value = '';
+    document.getElementById('pStock').value = '';
+    document.getElementById('pMinStock').value = '';
+    document.getElementById('pPrice').value = '';
+    document.getElementById('pDesc').value = '';
+    document.getElementById('pUnit').value = 'unidad';
+    document.getElementById('pCurrency').value = state.currentCurrency;
+  }
+  document.getElementById('modalProduct').classList.add('active');
+}
+
+function saveProduct() {
+  const name = document.getElementById('pName').value.trim();
+  const category = document.getElementById('pCategory').value;
+  const stock = parseFloat(document.getElementById('pStock').value) || 0;
+  const minStock = parseFloat(document.getElementById('pMinStock').value) || 0;
+  const price = parseFloat(document.getElementById('pPrice').value) || 0;
+  const currency = document.getElementById('pCurrency').value;
+  const unit = document.getElementById('pUnit').value;
+  const description = document.getElementById('pDesc').value.trim();
+  
+  if (!name) { showToast('Ingresa el nombre del producto', 'error'); return; }
+  if (price < 0) { showToast('Precio inválido', 'error'); return; }
+  
+  if (state.editingId) {
+    const p = state.products.find(x => x.id === state.editingId);
+    if (p) {
+      p.name = name; p.category = category; p.stock = stock; p.minStock = minStock;
+      p.price = price; p.currency = currency; p.unit = unit; p.description = description;
+    }
+    showToast('Producto actualizado');
+  } else {
+    state.products.push({
+      id: uid(), name, category, stock, minStock, price, currency, unit, description,
+      createdAt: new Date().toISOString()
+    });
+    showToast('Producto agregado al inventario');
+  }
+  if (window.saveData) window.saveData();
+  closeModal('modalProduct');
+}
+
+function deleteProduct(id) {
+  const p = state.products.find(x => x.id === id);
+  if (!p) return;
+  if (confirm(`¿Eliminar "${p.name}" del inventario?`)) {
+    state.products = state.products.filter(x => x.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Producto eliminado', 'warning');
+  }
+}
+
+function renderInventory() {
+  const search = document.getElementById('invSearch').value.toLowerCase();
+  const catFilter = document.getElementById('invCategoryFilter').value;
+  const catSelect = document.getElementById('invCategoryFilter');
+  
+  if (catSelect.children.length !== state.categories.length + 1) {
+    catSelect.innerHTML = '<option value="">Todas las categorías</option>' + 
+      state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  }
+  
+  let filtered = state.products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search) || (p.description && p.description.toLowerCase().includes(search));
+    const matchCat = !catFilter || p.category === catFilter;
+    return matchSearch && matchCat;
+  });
+  
+  const tbody = document.getElementById('inventoryTable');
+  const empty = document.getElementById('inventoryEmpty');
+  
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  
+  tbody.innerHTML = filtered.map(p => {
+    const stockStatus = p.stock <= 0 ? '<span class="badge badge-danger">Sin stock</span>' :
+                        p.stock <= (p.minStock || 0) ? '<span class="badge badge-warning">Stock bajo</span>' :
+                        '<span class="badge badge-success">Disponible</span>';
+    const totalValue = p.stock * p.price;
+    const displayPrice = state.currentCurrency === p.currency ? p.price : convertCurrency(p.price, p.currency, state.currentCurrency);
+    const displayTotal = state.currentCurrency === p.currency ? totalValue : convertCurrency(totalValue, p.currency, state.currentCurrency);
+    const curSymbol = state.currentCurrency === 'PEN' ? 'S/' : '$';
+    
+    return `
+      <tr class="table-row border-b border-[var(--border)]">
+        <td class="p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-[rgba(0,217,126,0.1)] flex items-center justify-center text-[var(--accent)]">
+              <i class="fa-solid ${getCategoryIcon(p.category)}"></i>
+            </div>
+            <div>
+              <div class="font-semibold">${p.name}</div>
+              <div class="text-xs text-[var(--muted)]">${p.unit || 'unidad'} · ${p.currency === 'PEN' ? 'S/' : '$'} ${p.price.toFixed(2)}</div>
+            </div>
+          </div>
+        </td>
+        <td class="p-4 text-sm text-[var(--muted)]">${getCategoryName(p.category)}</td>
+        <td class="p-4 text-center font-bold">${p.stock}</td>
+        <td class="p-4 text-right font-semibold">${curSymbol} ${displayPrice.toFixed(2)}</td>
+        <td class="p-4 text-right font-bold text-[var(--accent)]">${curSymbol} ${displayTotal.toFixed(2)}</td>
+        <td class="p-4 text-center">${stockStatus}</td>
+        <td class="p-4">
+          <div class="flex items-center justify-center gap-2">
+            <button class="btn-ghost !p-2" onclick="openProductModal('${p.id}')" title="Editar"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button class="btn-danger !p-2" onclick="deleteProduct('${p.id}')" title="Eliminar"><i class="fa-solid fa-trash text-xs"></i></button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openSupplierModal(id = null) {
+  state.editingId = id;
+  if (id) {
+    const s = state.suppliers.find(x => x.id === id);
+    if (s) {
+      document.getElementById('supplierModalTitle').textContent = 'Editar proveedor';
+      document.getElementById('sName').value = s.name;
+      document.getElementById('sCompany').value = s.company;
+      document.getElementById('sPhone').value = s.phone || '';
+      document.getElementById('sEmail').value = s.email || '';
+      document.getElementById('sAddress').value = s.address || '';
+      document.getElementById('sProducts').value = s.products || '';
+    }
+  } else {
+    document.getElementById('supplierModalTitle').textContent = 'Nuevo proveedor';
+    ['sName','sCompany','sPhone','sEmail','sAddress','sProducts'].forEach(id => document.getElementById(id).value = '');
+  }
+  document.getElementById('modalSupplier').classList.add('active');
+}
+
+function saveSupplier() {
+  const name = document.getElementById('sName').value.trim();
+  const company = document.getElementById('sCompany').value.trim();
+  if (!name || !company) { showToast('Nombre y empresa son obligatorios', 'error'); return; }
+  
+  const data = {
+    name, company,
+    phone: document.getElementById('sPhone').value.trim(),
+    email: document.getElementById('sEmail').value.trim(),
+    address: document.getElementById('sAddress').value.trim(),
+    products: document.getElementById('sProducts').value.trim()
+  };
+  
+  if (state.editingId) {
+    const s = state.suppliers.find(x => x.id === state.editingId);
+    Object.assign(s, data);
+    showToast('Proveedor actualizado');
+  } else {
+    state.suppliers.push({ id: uid(), ...data });
+    showToast('Proveedor registrado');
+  }
+  if (window.saveData) window.saveData();
+  closeModal('modalSupplier');
+}
+
+function deleteSupplier(id) {
+  const s = state.suppliers.find(x => x.id === id);
+  if (confirm(`¿Eliminar al proveedor "${s.company}"?`)) {
+    state.suppliers = state.suppliers.filter(x => x.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Proveedor eliminado', 'warning');
+  }
+}
+
+function renderSuppliers() {
+  const search = document.getElementById('supSearch').value.toLowerCase();
+  const filtered = state.suppliers.filter(s => 
+    s.name.toLowerCase().includes(search) || s.company.toLowerCase().includes(search)
+  );
+  
+  const grid = document.getElementById('suppliersGrid');
+  const empty = document.getElementById('suppliersEmpty');
+  
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  
+  grid.innerHTML = filtered.map(s => {
+    return `
+      <div class="card p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[rgba(0,217,126,0.2)] to-[rgba(0,184,212,0.2)] flex items-center justify-center text-[var(--accent)] font-bold text-lg">
+            ${s.company.charAt(0).toUpperCase()}
+          </div>
+          <div class="flex gap-1">
+            <button class="btn-ghost !p-1.5" onclick="openSupplierModal('${s.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button class="btn-danger !p-1.5" onclick="deleteSupplier('${s.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
+          </div>
+        </div>
+        <h3 class="font-display font-bold text-base mb-0.5">${s.company}</h3>
+        <p class="text-xs text-[var(--muted)] mb-3">${s.name}</p>
+        <div class="space-y-1.5 text-xs">
+          ${s.phone ? `<div class="flex items-center gap-2 text-[var(--muted)]"><i class="fa-solid fa-phone text-[var(--accent)] w-3"></i> ${s.phone}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openPurchaseModal() {
+  if (state.products.length === 0) { showToast('Primero registra productos', 'warning'); return; }
+  const prodSelect = document.getElementById('puProduct');
+  prodSelect.innerHTML = state.products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  const supSelect = document.getElementById('puSupplier');
+  supSelect.innerHTML = '<option value="">Sin proveedor</option>' + state.suppliers.map(s => `<option value="${s.id}">${s.company}</option>`).join('');
+  
+  document.getElementById('puQty').value = '';
+  document.getElementById('puPrice').value = '';
+  document.getElementById('puCurrency').value = state.currentCurrency;
+  document.getElementById('puDate').value = new Date().toISOString().split('T')[0];
+  calcPurchaseTotal();
+  document.getElementById('modalPurchase').classList.add('active');
+}
+
+function calcPurchaseTotal() {
+  const qty = parseFloat(document.getElementById('puQty').value) || 0;
+  const price = parseFloat(document.getElementById('puPrice').value) || 0;
+  const cur = document.getElementById('puCurrency').value;
+  document.getElementById('puTotal').textContent = formatMoney(qty * price, cur);
+}
+
+function savePurchase() {
+  const productId = document.getElementById('puProduct').value;
+  const supplierId = document.getElementById('puSupplier').value;
+  const qty = parseFloat(document.getElementById('puQty').value);
+  const price = parseFloat(document.getElementById('puPrice').value);
+  const currency = document.getElementById('puCurrency').value;
+  const date = document.getElementById('puDate').value;
+  
+  if (!productId || !qty || !price || qty <= 0 || price <= 0) { showToast('Completa los campos obligatorios', 'error'); return; }
+  
+  state.purchases.push({ id: uid(), productId, supplierId, qty, price, currency, date: date || new Date().toISOString().split('T')[0] });
+  const p = state.products.find(x => x.id === productId);
+  if (p) p.stock += qty;
+  
+  if (window.saveData) window.saveData();
+  closeModal('modalPurchase');
+  showToast('Compra registrada · Stock actualizado');
+}
+
+function deletePurchase(id) {
+  if (confirm('¿Eliminar este registro de compra?')) {
+    state.purchases = state.purchases.filter(x => x.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Compra eliminada', 'warning');
+  }
+}
+
+function renderPurchases() {
+  const search = document.getElementById('purSearch').value.toLowerCase();
+  let filtered = state.purchases.filter(p => {
+    const prod = state.products.find(x => x.id === p.productId);
+    return (prod?.name || '').toLowerCase().includes(search);
+  }).sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const tbody = document.getElementById('purchasesTable');
+  const empty = document.getElementById('purchasesEmpty');
+  
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  
+  tbody.innerHTML = filtered.map(p => {
+    const prod = state.products.find(x => x.id === p.productId);
+    const sup = state.suppliers.find(x => x.id === p.supplierId);
+    const total = p.qty * p.price;
+    return `
+      <tr class="table-row border-b border-[var(--border)]">
+        <td class="p-4 text-sm">${formatDate(p.date)}</td>
+        <td class="p-4"><div class="font-semibold">${prod?.name || 'Producto eliminado'}</div></td>
+        <td class="p-4 text-sm">${sup?.company || '—'}</td>
+        <td class="p-4 text-center font-bold">${p.qty}</td>
+        <td class="p-4 text-right">${formatMoney(p.price, p.currency)}</td>
+        <td class="p-4 text-right font-bold text-[var(--accent-2)]">${formatMoney(total, p.currency)}</td>
+        <td class="p-4 text-center"><button class="btn-danger !p-2" onclick="deletePurchase('${p.id}')"><i class="fa-solid fa-trash text-xs"></i></button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openSaleModal() {
+  if (state.products.length === 0) { showToast('Primero registra productos', 'warning'); return; }
+  const prodSelect = document.getElementById('saProduct');
+  prodSelect.innerHTML = state.products.map(p => `<option value="${p.id}">${p.name} — Stock: ${p.stock}</option>`).join('');
+  document.getElementById('saClient').value = '';
+  document.getElementById('saQty').value = '';
+  document.getElementById('saPrice').value = '';
+  document.getElementById('saCurrency').value = state.currentCurrency;
+  document.getElementById('saDate').value = new Date().toISOString().split('T')[0];
+  updateSaleStockInfo();
+  calcSaleTotal();
+  document.getElementById('modalSale').classList.add('active');
+}
+
+function updateSaleStockInfo() {
+  const p = state.products.find(x => x.id === document.getElementById('saProduct').value);
+  if (p) {
+    document.getElementById('saStockInfo').innerHTML = `Stock disponible: <span class="font-bold text-[var(--accent)]">${p.stock} ${p.unit || 'unidad'}</span>`;
+    document.getElementById('saPrice').value = p.price;
+    document.getElementById('saCurrency').value = p.currency;
+    calcSaleTotal();
+  }
+}
+
+function calcSaleTotal() {
+  const qty = parseFloat(document.getElementById('saQty').value) || 0;
+  const price = parseFloat(document.getElementById('saPrice').value) || 0;
+  const cur = document.getElementById('saCurrency').value;
+  document.getElementById('saTotal').textContent = formatMoney(qty * price, cur);
+}
+
+function saveSale() {
+  const productId = document.getElementById('saProduct').value;
+  const client = document.getElementById('saClient').value.trim();
+  const qty = parseFloat(document.getElementById('saQty').value);
+  const price = parseFloat(document.getElementById('saPrice').value);
+  const currency = document.getElementById('saCurrency').value;
+  const date = document.getElementById('saDate').value;
+  
+  if (!productId || !qty || !price || qty <= 0 || price <= 0) { showToast('Campos obligatorios', 'error'); return; }
+  
+  const product = state.products.find(x => x.id === productId);
+  if (product && qty > product.stock) {
+    if (!confirm(`Stock insuficiente. Solo hay ${product.stock} disponibles. ¿Continuar?`)) return;
+  }
+  
+  state.sales.push({ id: uid(), productId, client, qty, price, currency, date: date || new Date().toISOString().split('T')[0] });
+  if (product) product.stock = Math.max(0, product.stock - qty);
+  
+  if (window.saveData) window.saveData();
+  closeModal('modalSale');
+  showToast('Venta registrada · Stock actualizado');
+}
+
+function deleteSale(id) {
+  if (confirm('¿Eliminar este registro de venta?')) {
+    state.sales = state.sales.filter(x => x.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Venta eliminada', 'warning');
+  }
+}
+
+function renderSales() {
+  const search = document.getElementById('saleSearch').value.toLowerCase();
+  let filtered = state.sales.filter(s => {
+    const prod = state.products.find(x => x.id === s.productId);
+    return (prod?.name || '').toLowerCase().includes(search);
+  }).sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const tbody = document.getElementById('salesTable');
+  const empty = document.getElementById('salesEmpty');
+  
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  
+  tbody.innerHTML = filtered.map(s => {
+    const prod = state.products.find(x => x.id === s.productId);
+    const total = s.qty * s.price;
+    return `
+      <tr class="table-row border-b border-[var(--border)]">
+        <td class="p-4 text-sm">${formatDate(s.date)}</td>
+        <td class="p-4"><div class="font-semibold">${prod?.name || 'Producto eliminado'}</div></td>
+        <td class="p-4 text-sm">${s.client || '—'}</td>
+        <td class="p-4 text-center font-bold">${s.qty}</td>
+        <td class="p-4 text-right">${formatMoney(s.price, s.currency)}</td>
+        <td class="p-4 text-right font-bold text-[var(--accent)]">${formatMoney(total, s.currency)}</td>
+        <td class="p-4 text-center"><button class="btn-danger !p-2" onclick="deleteSale('${s.id}')"><i class="fa-solid fa-trash text-xs"></i></button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function openCategoryModal() {
+  document.getElementById('cName').value = '';
+  state.selectedIcon = 'fa-circle';
+  document.querySelectorAll('#iconPicker button').forEach(b => {
+    b.style.borderColor = ''; b.style.background = '';
+    b.onclick = () => {
+      document.querySelectorAll('#iconPicker button').forEach(x => { x.style.borderColor = ''; x.style.background = ''; });
+      b.style.borderColor = 'var(--accent)';
+      b.style.background = 'rgba(0, 217, 126, 0.15)';
+      state.selectedIcon = b.dataset.icon;
+    };
+  });
+  document.getElementById('modalCategory').classList.add('active');
+}
+
+function saveCategory() {
+  const name = document.getElementById('cName').value.trim();
+  if (!name) { showToast('Ingresa el nombre', 'error'); return; }
+  state.categories.push({ id: uid(), name, icon: state.selectedIcon });
+  if (window.saveData) window.saveData();
+  closeModal('modalCategory');
+  showToast('Categoría creada');
+}
+
+function deleteCategory(id) {
+  if (state.products.filter(p => p.category === id).length > 0) { showToast('No se puede eliminar: en uso', 'error'); return; }
+  if (confirm('¿Eliminar esta categoría?')) {
+    state.categories = state.categories.filter(c => c.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Categoría eliminada', 'warning');
+  }
+}
+
+function renderCategories() {
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = state.categories.map(c => {
+    const count = state.products.filter(p => p.category === c.id).length;
+    return `
+      <div class="card p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-[rgba(0,217,126,0.12)] flex items-center justify-center text-[var(--accent)] text-lg">
+            <i class="fa-solid ${c.icon}"></i>
+          </div>
+          <button class="btn-danger !p-1.5" onclick="deleteCategory('${c.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
+        </div>
+        <h3 class="font-display font-bold text-sm mb-1">${c.name}</h3>
+        <div class="text-xs text-[var(--muted)] mb-3">${count} producto(s)</div>
+      </div>
+    `;
+  }).join('');
+}
+
+let chartMov, chartCat;
+function renderDashboard() {
+  document.getElementById('statTotalProducts').textContent = state.products.length;
+  document.getElementById('statSuppliers').textContent = state.suppliers.length;
+  document.getElementById('statLowStock').textContent = state.products.filter(p => p.stock <= (p.minStock || 0)).length;
+  
+  const inventoryValue = state.products.reduce((sum, p) => sum + convertCurrency(p.stock * p.price, p.currency, state.currentCurrency), 0);
+  const curSymbol = state.currentCurrency === 'PEN' ? 'S/' : '$';
+  document.getElementById('statInventoryValue').textContent = curSymbol + ' ' + inventoryValue.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+  
+  const now = new Date();
+  const monthSales = state.sales.filter(s => new Date(s.date).getMonth() === now.getMonth());
+  const monthPurchases = state.purchases.filter(p => new Date(p.date).getMonth() === now.getMonth());
+  
+  const salesTotal = monthSales.reduce((sum, s) => sum + convertCurrency(s.qty * s.price, s.currency, state.currentCurrency), 0);
+  const purchasesTotal = monthPurchases.reduce((sum, p) => sum + convertCurrency(p.qty * p.price, p.currency, state.currentCurrency), 0);
+  
+  document.getElementById('financeSales').textContent = curSymbol + ' ' + salesTotal.toLocaleString('es-PE');
+  document.getElementById('financePurchases').textContent = curSymbol + ' ' + purchasesTotal.toLocaleString('es-PE');
+  document.getElementById('financeBalance').textContent = curSymbol + ' ' + (salesTotal - purchasesTotal).toLocaleString('es-PE');
+  
+  const maxVal = Math.max(salesTotal, purchasesTotal, 1);
+  document.getElementById('salesBar').style.width = (salesTotal / maxVal * 100) + '%';
+  document.getElementById('purchasesBar').style.width = (purchasesTotal / maxVal * 100) + '%';
+  
+  // Gráficos básicos para que funcione el dashboard (simplificados por espacio)
+  const ctxCat = document.getElementById('chartCategories').getContext('2d');
+  if (chartCat) chartCat.destroy();
+  chartCat = new Chart(ctxCat, { type: 'doughnut', data: { labels: ['Activos'], datasets: [{ data: [1], backgroundColor: ['rgba(0, 217, 126, 0.85)'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+
+  const lowStockList = document.getElementById('lowStockList');
+  const low = state.products.filter(p => p.stock <= (p.minStock || 0)).slice(0, 5);
+  lowStockList.innerHTML = low.length === 0 ? '<div class="text-sm text-center py-4">Todo OK</div>' : low.map(p => `
+    <div class="flex justify-between p-3 bg-[var(--bg-2)] border rounded-lg">
+      <div class="font-semibold text-sm">${p.name}</div>
+      <div class="font-bold">${p.stock}</div>
+    </div>
+  `).join('');
+}
+
+function init() {
+  loadData();
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); }));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.active').forEach(m => closeModal(m.id)); });
+}
+
+init();
+</script>
 </body>
 </html>
