@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HydroStock · Sistema de Inventario Hidropónico</title>
+<title>HydroStock · Sistema Integral Hidropónico</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,6 +22,7 @@
     --accent-3: #7cffb3;
     --warning: #ffb84d;
     --danger: #ff5e6c;
+    --purple: #b388ff;
     --fg: #e8f5e9;
     --muted: #8aae9f;
     --muted-2: #4a7065;
@@ -38,7 +39,6 @@
   }
   .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
   
-  /* Fondo decorativo */
   .bg-mesh {
     position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background:
@@ -56,21 +56,22 @@
     mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent 80%);
   }
   
-  /* Scrollbar */
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: var(--bg-2); }
   ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 8px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
   
-  /* Sidebar */
   .sidebar {
-    background: linear-gradient(180deg, rgba(15, 38, 32, 0.85), rgba(10, 28, 22, 0.85));
+    background: linear-gradient(180deg, rgba(15, 38, 32, 0.92), rgba(10, 28, 22, 0.92));
     backdrop-filter: blur(20px);
     border-right: 1px solid var(--border);
   }
+  .nav-section-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted-2); padding: 14px 16px 6px;
+  }
   .nav-item {
-    position: relative;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .nav-item::before {
     content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
@@ -86,8 +87,11 @@
     background: rgba(0, 217, 126, 0.06);
     color: var(--accent-3);
   }
+  .nav-item.internal.active::before { background: var(--purple); }
+  .nav-item.internal.active { background: linear-gradient(90deg, rgba(179, 136, 255, 0.15), transparent); color: var(--purple); }
+  .nav-item.production.active::before { background: var(--warning); }
+  .nav-item.production.active { background: linear-gradient(90deg, rgba(255, 184, 77, 0.15), transparent); color: var(--warning); }
   
-  /* Cards */
   .card {
     background: linear-gradient(135deg, rgba(15, 38, 32, 0.7), rgba(20, 48, 40, 0.5));
     border: 1px solid var(--border);
@@ -97,7 +101,6 @@
   }
   .card:hover { border-color: var(--border-hover); }
   
-  /* Stat cards */
   .stat-card {
     position: relative; overflow: hidden;
     background: linear-gradient(135deg, var(--surface), var(--surface-2));
@@ -114,46 +117,52 @@
   }
   .stat-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
   
-  /* Buttons */
   .btn-primary {
     background: linear-gradient(135deg, var(--accent), #00b86b);
-    color: #06110d;
-    font-weight: 700;
-    border-radius: 12px;
-    padding: 10px 18px;
+    color: #06110d; font-weight: 700;
+    border-radius: 12px; padding: 10px 18px;
     transition: all 0.2s ease;
     box-shadow: 0 4px 20px rgba(0, 217, 126, 0.25);
-    border: none;
-    cursor: pointer;
+    border: none; cursor: pointer;
   }
   .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(0, 217, 126, 0.4); }
   .btn-primary:active { transform: translateY(0); }
+  
+  .btn-purple {
+    background: linear-gradient(135deg, var(--purple), #7c4dff);
+    color: #06110d; font-weight: 700;
+    border-radius: 12px; padding: 10px 18px;
+    box-shadow: 0 4px 20px rgba(179, 136, 255, 0.25);
+    border: none; cursor: pointer; transition: all 0.2s ease;
+  }
+  .btn-purple:hover { transform: translateY(-1px); }
+  
+  .btn-amber {
+    background: linear-gradient(135deg, var(--warning), #ff9d2e);
+    color: #06110d; font-weight: 700;
+    border-radius: 12px; padding: 10px 18px;
+    box-shadow: 0 4px 20px rgba(255, 184, 77, 0.25);
+    border: none; cursor: pointer; transition: all 0.2s ease;
+  }
+  .btn-amber:hover { transform: translateY(-1px); }
   
   .btn-ghost {
     background: rgba(0, 217, 126, 0.08);
     color: var(--accent);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 14px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    font-weight: 600;
+    border-radius: 10px; padding: 8px 14px;
+    transition: all 0.2s ease; cursor: pointer; font-weight: 600;
   }
   .btn-ghost:hover { background: rgba(0, 217, 126, 0.15); border-color: var(--border-hover); }
   
   .btn-danger {
-    background: rgba(255, 94, 108, 0.1);
-    color: var(--danger);
+    background: rgba(255, 94, 108, 0.1); color: var(--danger);
     border: 1px solid rgba(255, 94, 108, 0.2);
-    border-radius: 10px;
-    padding: 8px 14px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s ease;
+    border-radius: 10px; padding: 8px 14px;
+    cursor: pointer; font-weight: 600; transition: all 0.2s ease;
   }
   .btn-danger:hover { background: rgba(255, 94, 108, 0.2); }
   
-  /* Inputs */
   .input, .select, .textarea {
     background: var(--bg-2);
     border: 1px solid var(--border);
@@ -162,18 +171,15 @@
     color: var(--fg);
     width: 100%;
     transition: all 0.2s ease;
-    font-family: inherit;
-    font-size: 14px;
+    font-family: inherit; font-size: 14px;
   }
   .input:focus, .select:focus, .textarea:focus {
-    outline: none;
-    border-color: var(--accent);
+    outline: none; border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(0, 217, 126, 0.15);
   }
   .input::placeholder, .textarea::placeholder { color: var(--muted-2); }
   .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300d97e' stroke-width='3'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
   
-  /* Badges */
   .badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 4px 10px; border-radius: 999px;
@@ -184,46 +190,40 @@
   .badge-warning { background: rgba(255, 184, 77, 0.15); color: var(--warning); border: 1px solid rgba(255, 184, 77, 0.25); }
   .badge-danger { background: rgba(255, 94, 108, 0.15); color: var(--danger); border: 1px solid rgba(255, 94, 108, 0.25); }
   .badge-info { background: rgba(0, 184, 212, 0.15); color: var(--accent-2); border: 1px solid rgba(0, 184, 212, 0.25); }
+  .badge-purple { background: rgba(179, 136, 255, 0.15); color: var(--purple); border: 1px solid rgba(179, 136, 255, 0.25); }
   
-  /* Tables */
   .table-row { transition: background 0.15s ease; }
   .table-row:hover { background: rgba(0, 217, 126, 0.04); }
   
-  /* Modal */
   .modal-backdrop {
     position: fixed; inset: 0; z-index: 100;
     background: rgba(6, 17, 13, 0.7);
     backdrop-filter: blur(8px);
     display: flex; align-items: center; justify-content: center;
-    padding: 16px;
-    opacity: 0; pointer-events: none;
+    padding: 16px; opacity: 0; pointer-events: none;
     transition: opacity 0.25s ease;
   }
   .modal-backdrop.active { opacity: 1; pointer-events: auto; }
   .modal {
     background: linear-gradient(135deg, var(--surface), var(--surface-2));
     border: 1px solid var(--border-hover);
-    border-radius: 20px;
-    width: 100%; max-width: 580px;
-    max-height: 90vh; overflow-y: auto;
+    border-radius: 20px; width: 100%; max-width: 600px;
+    max-height: 92vh; overflow-y: auto;
     transform: scale(0.95) translateY(10px);
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 217, 126, 0.1);
   }
   .modal-backdrop.active .modal { transform: scale(1) translateY(0); }
   
-  /* Toast */
   .toast-container {
     position: fixed; bottom: 20px; right: 20px; z-index: 200;
-    display: flex; flex-direction: column; gap: 10px;
-    pointer-events: none;
+    display: flex; flex-direction: column; gap: 10px; pointer-events: none;
   }
   .toast {
     background: linear-gradient(135deg, var(--surface-2), var(--surface));
     border: 1px solid var(--border-hover);
     border-left: 3px solid var(--accent);
-    border-radius: 12px;
-    padding: 12px 16px;
+    border-radius: 12px; padding: 12px 16px;
     color: var(--fg);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     min-width: 280px; max-width: 360px;
@@ -237,32 +237,24 @@
   @keyframes toastIn { to { transform: translateX(0); } }
   @keyframes toastOut { to { transform: translateX(120%); opacity: 0; } }
   
-  /* Animaciones */
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-in { animation: fadeIn 0.4s ease forwards; }
   
-  @keyframes pulse-dot {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.7; }
-  }
+  @keyframes pulse-dot { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
   .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
   
-  /* Mobile */
   @media (max-width: 1024px) {
-    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; width: 260px !important; }
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 50; transform: translateX(-100%); transition: transform 0.3s ease; width: 280px !important; }
     .sidebar.open { transform: translateX(0); }
     .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 49; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
   }
   
-  /* Chart container */
   .chart-wrap { position: relative; height: 280px; }
   
-  /* Progress bar */
   .progress { height: 6px; background: rgba(0, 217, 126, 0.1); border-radius: 999px; overflow: hidden; }
   .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-3)); border-radius: 999px; transition: width 0.5s ease; }
   
-  /* Floating action */
   .fab {
     position: fixed; bottom: 24px; right: 24px; z-index: 40;
     width: 56px; height: 56px; border-radius: 50%;
@@ -270,40 +262,30 @@
     color: #06110d; font-size: 24px;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 8px 30px rgba(0, 217, 126, 0.4);
-    cursor: pointer; border: none;
-    transition: all 0.2s ease;
+    cursor: pointer; border: none; transition: all 0.2s ease;
   }
   .fab:hover { transform: scale(1.08) rotate(90deg); }
   @media (min-width: 1024px) { .fab { display: none; } }
   
-  /* Empty state */
-  .empty-state {
-    text-align: center; padding: 60px 20px;
-    color: var(--muted);
-  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-state i { font-size: 56px; color: var(--muted-2); margin-bottom: 16px; }
   
-  /* Search */
   .search-wrap { position: relative; }
   .search-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted-2); }
   .search-wrap .input { padding-left: 40px; }
   
-  /* Tab pills */
   .tab-pill {
     padding: 8px 16px; border-radius: 10px;
     background: transparent; color: var(--muted);
     font-weight: 600; cursor: pointer; transition: all 0.2s ease;
-    border: 1px solid transparent;
-    font-size: 13px;
+    border: 1px solid transparent; font-size: 13px; white-space: nowrap;
   }
   .tab-pill.active { background: rgba(0, 217, 126, 0.12); color: var(--accent); border-color: rgba(0, 217, 126, 0.25); }
   .tab-pill:hover:not(.active) { color: var(--accent-3); background: rgba(0, 217, 126, 0.05); }
   
-  /* Hide scrollbar horizontal */
   .scroll-x { overflow-x: auto; }
   .scroll-x::-webkit-scrollbar { height: 6px; }
   
-  /* Logo */
   .logo-mark {
     width: 40px; height: 40px;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -313,7 +295,6 @@
     box-shadow: 0 4px 20px rgba(0, 217, 126, 0.3);
   }
   
-  /* Currency toggle */
   .currency-toggle {
     display: inline-flex; background: var(--bg-2); border: 1px solid var(--border);
     border-radius: 10px; padding: 3px;
@@ -324,11 +305,45 @@
     transition: all 0.2s ease;
   }
   .currency-toggle button.active { background: var(--accent); color: #06110d; }
+  
+  .stage-indicator {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  }
+  .stage-almacigo { background: rgba(179, 136, 255, 0.15); color: var(--purple); }
+  .stage-crecimiento { background: rgba(0, 184, 212, 0.15); color: var(--accent-2); }
+  .stage-floracion { background: rgba(255, 184, 77, 0.15); color: var(--warning); }
+  .stage-cosecha { background: rgba(0, 217, 126, 0.15); color: var(--accent); }
+  
+  .param-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;
+  }
+  .param-card {
+    background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px; text-align: center;
+  }
+  .param-card .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .param-card .value { font-size: 20px; font-weight: 700; font-family: 'Space Grotesk'; margin-top: 4px; }
+  
+  .quick-stat {
+    background: var(--bg-2); border-radius: 12px; padding: 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  
+  .filter-chip {
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--bg-2); border: 1px solid var(--border);
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s ease; color: var(--muted);
+    white-space: nowrap;
+  }
+  .filter-chip:hover { border-color: var(--border-hover); color: var(--fg); }
+  .filter-chip.active { background: rgba(0,217,126,0.15); border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
 
-<!-- PANTALLA DE SEGURIDAD (CON DISEÑO OSCURO) -->
+<!-- PANTALLA DE SEGURIDAD -->
 <div id="pantalla-bloqueo" class="fixed inset-0 z-[999] bg-[var(--bg)] flex flex-col items-center justify-center p-4">
   <div class="card p-8 w-full max-w-sm text-center">
     <div class="logo-mark mx-auto mb-4 scale-125">
@@ -336,7 +351,7 @@
     </div>
     <h2 class="font-display font-bold text-2xl mb-2 text-[var(--fg)]">Acceso Restringido</h2>
     <p class="text-[var(--muted)] text-sm mb-6">Ingresa tu clave de operaciones</p>
-    <input type="password" id="pin-acceso" class="input text-center text-xl mb-4 tracking-widest text-white" placeholder="••••">
+    <input type="password" id="pin-acceso" class="input text-center text-xl mb-4 tracking-widest text-white" placeholder="••••" onkeydown="if(event.key==='Enter')verificarAcceso()">
     <button class="btn-primary w-full" onclick="verificarAcceso()">Entrar al Sistema</button>
   </div>
 </div>
@@ -344,7 +359,6 @@
 <div class="bg-mesh"></div>
 <div class="bg-grid"></div>
 
-<!-- Sidebar overlay (mobile) -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="flex min-h-screen">
@@ -356,28 +370,57 @@
       </div>
       <div>
         <div class="font-display font-bold text-lg leading-tight">HydroStock</div>
-        <div class="text-[10px] text-[var(--muted)] uppercase tracking-widest">Inventario Premium</div>
+        <div class="text-[10px] text-[var(--muted)] uppercase tracking-widest">Sistema Integral</div>
       </div>
     </div>
     
-    <nav class="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-      <button class="nav-item active w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="dashboard" onclick="navigate('dashboard')">
+    <nav class="flex-1 py-2 px-2 space-y-0.5 overflow-y-auto">
+      <button class="nav-item active w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="dashboard" onclick="navigate('dashboard')">
         <i class="fa-solid fa-chart-line w-5"></i> Dashboard
       </button>
-      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="inventory" onclick="navigate('inventory')">
-        <i class="fa-solid fa-boxes-stacked w-5"></i> Inventario
+      
+      <div class="nav-section-label">Inventario General</div>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="inventory" onclick="navigate('inventory')">
+        <i class="fa-solid fa-boxes-stacked w-5"></i> Productos Generales
       </button>
-      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="suppliers" onclick="navigate('suppliers')">
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="suppliers" onclick="navigate('suppliers')">
         <i class="fa-solid fa-truck-field w-5"></i> Proveedores
       </button>
-      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="purchases" onclick="navigate('purchases')">
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="purchases" onclick="navigate('purchases')">
         <i class="fa-solid fa-cart-shopping w-5"></i> Compras
       </button>
-      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="sales" onclick="navigate('sales')">
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="sales" onclick="navigate('sales')">
         <i class="fa-solid fa-money-bill-trend-up w-5"></i> Ventas
       </button>
-      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold" data-view="categories" onclick="navigate('categories')">
+      
+      <div class="nav-section-label">Uso Interno</div>
+      <button class="nav-item internal w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="internal" onclick="navigate('internal')">
+        <i class="fa-solid fa-toolbox w-5"></i> Materiales Internos
+      </button>
+      <button class="nav-item internal w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="internal-moves" onclick="navigate('internal-moves')">
+        <i class="fa-solid fa-right-left w-5"></i> Movimientos Internos
+      </button>
+      
+      <div class="nav-section-label">Producción · Huerta</div>
+      <button class="nav-item production w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="almacigo" onclick="navigate('almacigo')">
+        <i class="fa-solid fa-seedling w-5"></i> Almácigos
+      </button>
+      <button class="nav-item production w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="cultivos" onclick="navigate('cultivos')">
+        <i class="fa-solid fa-leaf w-5"></i> Cultivos Activos
+      </button>
+      <button class="nav-item production w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="control-diario" onclick="navigate('control-diario')">
+        <i class="fa-solid fa-clipboard-check w-5"></i> Control Diario
+      </button>
+      <button class="nav-item production w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="cosechas" onclick="navigate('cosechas')">
+        <i class="fa-solid fa-basket-shopping w-5"></i> Cosechas
+      </button>
+      
+      <div class="nav-section-label">Organización</div>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="categories" onclick="navigate('categories')">
         <i class="fa-solid fa-tags w-5"></i> Categorías
+      </button>
+      <button class="nav-item w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-semibold" data-view="reports" onclick="navigate('reports')">
+        <i class="fa-solid fa-chart-pie w-5"></i> Reportes
       </button>
     </nav>
     
@@ -394,18 +437,15 @@
 
   <!-- MAIN -->
   <main class="flex-1 min-w-0">
-    <!-- HEADER -->
-    <header class="sticky top-0 z-30 bg-[rgba(6,17,13,0.8)] backdrop-blur-xl border-b border-[var(--border)] px-4 lg:px-8 py-4">
+    <header class="sticky top-0 z-30 bg-[rgba(6,17,13,0.85)] backdrop-blur-xl border-b border-[var(--border)] px-4 lg:px-8 py-4">
       <div class="flex items-center gap-4">
         <button class="lg:hidden btn-ghost !p-2" onclick="toggleSidebar()">
           <i class="fa-solid fa-bars"></i>
         </button>
-        
         <div class="flex-1 min-w-0">
           <h1 class="font-display font-bold text-xl lg:text-2xl truncate" id="pageTitle">Dashboard</h1>
-          <p class="text-xs text-[var(--muted)] truncate" id="pageSubtitle">Resumen general de tu inventario hidropónico</p>
+          <p class="text-xs text-[var(--muted)] truncate" id="pageSubtitle">Resumen general del sistema</p>
         </div>
-        
         <div class="hidden md:flex items-center gap-3">
           <div class="currency-toggle">
             <button class="active" data-cur="PEN" onclick="setCurrency('PEN')">S/</button>
@@ -419,13 +459,10 @@
             <i class="fa-solid fa-pen"></i>
           </button>
         </div>
-        
         <button class="btn-primary hidden lg:flex items-center gap-2" onclick="quickAdd()">
           <i class="fa-solid fa-plus"></i> Agregar
         </button>
       </div>
-      
-      <!-- Mobile currency -->
       <div class="flex md:hidden items-center gap-2 mt-3">
         <div class="currency-toggle">
           <button class="active" data-cur="PEN" onclick="setCurrency('PEN')">Soles (S/)</button>
@@ -435,9 +472,8 @@
       </div>
     </header>
 
-    <!-- VIEWS -->
     <div class="p-4 lg:p-8" id="viewsContainer">
-      
+
       <!-- DASHBOARD -->
       <section class="view fade-in" id="view-dashboard">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 mb-6">
@@ -446,12 +482,31 @@
               <div class="w-10 h-10 rounded-xl bg-[rgba(0,217,126,0.15)] flex items-center justify-center text-[var(--accent)]">
                 <i class="fa-solid fa-boxes-stacked"></i>
               </div>
-              <span class="badge badge-success"><i class="fa-solid fa-arrow-up text-[8px]"></i> Items</span>
+              <span class="badge badge-success">General</span>
             </div>
             <div class="text-3xl font-display font-bold" id="statTotalProducts">0</div>
-            <div class="text-xs text-[var(--muted)] mt-1">Productos en inventario</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Productos generales</div>
           </div>
-          
+          <div class="stat-card" style="--glow: rgba(179, 136, 255, 0.2)">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[rgba(179,136,255,0.15)] flex items-center justify-center text-[var(--purple)]">
+                <i class="fa-solid fa-toolbox"></i>
+              </div>
+              <span class="badge badge-purple">Interno</span>
+            </div>
+            <div class="text-3xl font-display font-bold" id="statTotalInternal">0</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Materiales internos</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(255, 184, 77, 0.2)">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-10 h-10 rounded-xl bg-[rgba(255,184,77,0.15)] flex items-center justify-center text-[var(--warning)]">
+                <i class="fa-solid fa-seedling"></i>
+              </div>
+              <span class="badge badge-warning">Producción</span>
+            </div>
+            <div class="text-3xl font-display font-bold" id="statActiveCrops">0</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Cultivos activos</div>
+          </div>
           <div class="stat-card" style="--glow: rgba(0, 184, 212, 0.2)">
             <div class="flex items-center justify-between mb-3">
               <div class="w-10 h-10 rounded-xl bg-[rgba(0,184,212,0.15)] flex items-center justify-center text-[var(--accent-2)]">
@@ -460,32 +515,10 @@
               <span class="badge badge-info" id="statCurrencyBadge">PEN</span>
             </div>
             <div class="text-3xl font-display font-bold" id="statInventoryValue">S/ 0.00</div>
-            <div class="text-xs text-[var(--muted)] mt-1">Valor de inventario</div>
-          </div>
-          
-          <div class="stat-card" style="--glow: rgba(255, 184, 77, 0.2)">
-            <div class="flex items-center justify-between mb-3">
-              <div class="w-10 h-10 rounded-xl bg-[rgba(255,184,77,0.15)] flex items-center justify-center text-[var(--warning)]">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-              </div>
-              <span class="badge badge-warning">Alerta</span>
-            </div>
-            <div class="text-3xl font-display font-bold" id="statLowStock">0</div>
-            <div class="text-xs text-[var(--muted)] mt-1">Productos con stock bajo</div>
-          </div>
-          
-          <div class="stat-card" style="--glow: rgba(124, 255, 179, 0.2)">
-            <div class="flex items-center justify-between mb-3">
-              <div class="w-10 h-10 rounded-xl bg-[rgba(124,255,179,0.15)] flex items-center justify-center text-[var(--accent-3)]">
-                <i class="fa-solid fa-truck-field"></i>
-              </div>
-              <span class="badge badge-success">Activos</span>
-            </div>
-            <div class="text-3xl font-display font-bold" id="statSuppliers">0</div>
-            <div class="text-xs text-[var(--muted)] mt-1">Proveedores registrados</div>
+            <div class="text-xs text-[var(--muted)] mt-1">Valor total inventario</div>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
           <div class="card p-5 lg:col-span-2">
             <div class="flex items-center justify-between mb-4">
@@ -493,58 +526,63 @@
                 <h3 class="font-display font-bold text-lg">Movimientos del mes</h3>
                 <p class="text-xs text-[var(--muted)]">Compras vs Ventas</p>
               </div>
-              <div class="flex gap-2 text-xs">
+              <div class="flex gap-3 text-xs">
                 <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[var(--accent-2)]"></span> Compras</span>
                 <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[var(--accent)]"></span> Ventas</span>
               </div>
             </div>
             <div class="chart-wrap"><canvas id="chartMovements"></canvas></div>
           </div>
-          
           <div class="card p-5">
             <div class="flex items-center justify-between mb-4">
               <div>
-                <h3 class="font-display font-bold text-lg">Por categoría</h3>
-                <p class="text-xs text-[var(--muted)]">Distribución de inventario</p>
+                <h3 class="font-display font-bold text-lg">Producción anual</h3>
+                <p class="text-xs text-[var(--muted)]">Cosechas por mes (kg)</p>
               </div>
             </div>
-            <div class="chart-wrap"><canvas id="chartCategories"></canvas></div>
+            <div class="chart-wrap"><canvas id="chartHarvest"></canvas></div>
           </div>
         </div>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div class="card p-5">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="font-display font-bold text-lg">Productos con stock bajo</h3>
-              <button class="text-xs text-[var(--accent)] font-semibold" onclick="navigate('inventory')">Ver todo →</button>
+              <h3 class="font-display font-bold text-lg">Stock bajo</h3>
+              <button class="text-xs text-[var(--accent)] font-semibold" onclick="navigate('inventory')">Ver →</button>
             </div>
-            <div id="lowStockList" class="space-y-3"></div>
+            <div id="lowStockList" class="space-y-2"></div>
           </div>
-          
+          <div class="card p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-display font-bold text-lg">Cultivos en proceso</h3>
+              <button class="text-xs text-[var(--warning)] font-semibold" onclick="navigate('cultivos')">Ver →</button>
+            </div>
+            <div id="activeCropsList" class="space-y-2"></div>
+          </div>
           <div class="card p-5">
             <div class="flex items-center justify-between mb-4">
               <h3 class="font-display font-bold text-lg">Resumen financiero</h3>
               <span class="badge badge-info" id="financeBadge">PEN</span>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-3">
               <div>
-                <div class="flex justify-between text-sm mb-2">
-                  <span class="text-[var(--muted)]">Ingresos por ventas (mes)</span>
-                  <span class="font-bold text-[var(--accent)]" id="financeSales">S/ 0.00</span>
+                <div class="flex justify-between text-sm mb-1.5">
+                  <span class="text-[var(--muted)]">Ventas (mes)</span>
+                  <span class="font-bold text-[var(--accent)]" id="financeSales">S/ 0</span>
                 </div>
                 <div class="progress"><div class="progress-bar" id="salesBar" style="width: 0%"></div></div>
               </div>
               <div>
-                <div class="flex justify-between text-sm mb-2">
-                  <span class="text-[var(--muted)]">Gastos por compras (mes)</span>
-                  <span class="font-bold text-[var(--accent-2)]" id="financePurchases">S/ 0.00</span>
+                <div class="flex justify-between text-sm mb-1.5">
+                  <span class="text-[var(--muted)]">Compras (mes)</span>
+                  <span class="font-bold text-[var(--accent-2)]" id="financePurchases">S/ 0</span>
                 </div>
                 <div class="progress"><div class="progress-bar" id="purchasesBar" style="width: 0%; background: linear-gradient(90deg, var(--accent-2))"></div></div>
               </div>
               <div class="pt-3 border-t border-[var(--border)]">
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-[var(--muted)]">Balance neto</span>
-                  <span class="font-display font-bold text-2xl" id="financeBalance">S/ 0.00</span>
+                  <span class="font-display font-bold text-2xl" id="financeBalance">S/ 0</span>
                 </div>
               </div>
             </div>
@@ -552,21 +590,18 @@
         </div>
       </section>
 
-      <!-- INVENTARIO -->
+      <!-- INVENTARIO GENERAL -->
       <section class="view hidden" id="view-inventory">
         <div class="flex flex-col lg:flex-row gap-3 mb-5">
           <div class="search-wrap flex-1">
             <i class="fa-solid fa-search"></i>
-            <input type="text" class="input" placeholder="Buscar producto..." id="invSearch" oninput="renderInventory()">
+            <input type="text" class="input" placeholder="Buscar producto general..." id="invSearch" oninput="renderInventory()">
           </div>
-          <select class="select lg:w-56" id="invCategoryFilter" onchange="renderInventory()">
-            <option value="">Todas las categorías</option>
-          </select>
+          <select class="select lg:w-56" id="invCategoryFilter" onchange="renderInventory()"></select>
           <button class="btn-primary flex items-center gap-2 justify-center" onclick="openProductModal()">
             <i class="fa-solid fa-plus"></i> Nuevo producto
           </button>
         </div>
-        
         <div class="card overflow-hidden">
           <div class="scroll-x">
             <table class="w-full text-sm">
@@ -586,8 +621,263 @@
           </div>
           <div id="inventoryEmpty" class="empty-state hidden">
             <i class="fa-solid fa-box-open"></i>
-            <p class="font-bold text-lg mb-1">No hay productos</p>
-            <p class="text-sm">Agrega tu primer producto al inventario</p>
+            <p class="font-bold text-lg mb-1">No hay productos generales</p>
+            <p class="text-sm">Agrega tu primer producto para venta</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- MATERIALES INTERNOS -->
+      <section class="view hidden" id="view-internal">
+        <div class="card p-4 mb-5 border-l-4 border-l-[var(--purple)]">
+          <div class="flex items-start gap-3">
+            <i class="fa-solid fa-circle-info text-[var(--purple)] text-xl mt-0.5"></i>
+            <div>
+              <h3 class="font-display font-bold text-sm">Inventario de Uso Interno</h3>
+              <p class="text-xs text-[var(--muted)] mt-1">Aquí registras los materiales que usamos nosotros para operación: herramientas, insumos de mantenimiento, equipos, etc. Separado del inventario general de ventas.</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar material interno..." id="intSearch" oninput="renderInternal()">
+          </div>
+          <select class="select lg:w-56" id="intCategoryFilter" onchange="renderInternal()"></select>
+          <button class="btn-purple flex items-center gap-2 justify-center" onclick="openInternalModal()">
+            <i class="fa-solid fa-plus"></i> Nuevo material
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="scroll-x">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-left text-[var(--muted)] text-xs uppercase tracking-wider">
+                  <th class="p-4">Material</th>
+                  <th class="p-4">Categoría</th>
+                  <th class="p-4 text-center">Stock</th>
+                  <th class="p-4 text-center">Estado</th>
+                  <th class="p-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="internalTable"></tbody>
+            </table>
+          </div>
+          <div id="internalEmpty" class="empty-state hidden">
+            <i class="fa-solid fa-toolbox"></i>
+            <p class="font-bold text-lg mb-1">No hay materiales internos</p>
+            <p class="text-sm">Registra los materiales de uso interno</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOVIMIENTOS INTERNOS -->
+      <section class="view hidden" id="view-internal-moves">
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar movimiento..." id="intMoveSearch" oninput="renderInternalMoves()">
+          </div>
+          <button class="btn-purple flex items-center gap-2 justify-center" onclick="openInternalMoveModal()">
+            <i class="fa-solid fa-plus"></i> Registrar movimiento
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="scroll-x">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-left text-[var(--muted)] text-xs uppercase tracking-wider">
+                  <th class="p-4">Fecha</th>
+                  <th class="p-4">Material</th>
+                  <th class="p-4 text-center">Tipo</th>
+                  <th class="p-4 text-center">Cantidad</th>
+                  <th class="p-4">Motivo</th>
+                  <th class="p-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="internalMovesTable"></tbody>
+            </table>
+          </div>
+          <div id="internalMovesEmpty" class="empty-state hidden">
+            <i class="fa-solid fa-right-left"></i>
+            <p class="font-bold text-lg mb-1">No hay movimientos</p>
+            <p class="text-sm">Registra entradas o salidas de materiales internos</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALMÁCIGOS -->
+      <section class="view hidden" id="view-almacigo">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <div class="stat-card" style="--glow: rgba(179, 136, 255, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Siembras activas</div>
+            <div class="text-2xl font-display font-bold text-[var(--purple)]" id="almActiveCount">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(0, 217, 126, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Listas trasplante</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent)]" id="almReadyCount">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(255, 184, 77, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Germinadas</div>
+            <div class="text-2xl font-display font-bold text-[var(--warning)]" id="almGerminatedCount">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(0, 184, 212, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Total sembradas</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent-2)]" id="almTotalCount">0</div>
+          </div>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar almácigo..." id="almSearch" oninput="renderAlmacigo()">
+          </div>
+          <select class="select lg:w-48" id="almFilter" onchange="renderAlmacigo()">
+            <option value="">Todos los estados</option>
+            <option value="sembrado">Sembrado</option>
+            <option value="germinado">Germinado</option>
+            <option value="listo">Listo trasplante</option>
+            <option value="trasplantado">Trasplantado</option>
+            <option value="perdido">Perdido</option>
+          </select>
+          <button class="btn-amber flex items-center gap-2 justify-center" onclick="openAlmacigoModal()">
+            <i class="fa-solid fa-plus"></i> Nuevo almácigo
+          </button>
+        </div>
+        <div id="almacigoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="almacigoEmpty" class="empty-state hidden">
+          <i class="fa-solid fa-seedling"></i>
+          <p class="font-bold text-lg mb-1">No hay almácigos</p>
+          <p class="text-sm">Registra tu primer almácigo</p>
+        </div>
+      </section>
+
+      <!-- CULTIVOS ACTIVOS -->
+      <section class="view hidden" id="view-cultivos">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <div class="stat-card" style="--glow: rgba(0, 217, 126, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Cultivos activos</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent)]" id="culActiveCount">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(0, 184, 212, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Total plantas</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent-2)]" id="culTotalPlants">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(255, 184, 77, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">En floración</div>
+            <div class="text-2xl font-display font-bold text-[var(--warning)]" id="culFlowering">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(179, 136, 255, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Listos cosecha</div>
+            <div class="text-2xl font-display font-bold text-[var(--purple)]" id="culReady">0</div>
+          </div>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar cultivo..." id="culSearch" oninput="renderCultivos()">
+          </div>
+          <select class="select lg:w-48" id="culStageFilter" onchange="renderCultivos()">
+            <option value="">Todas etapas</option>
+            <option value="crecimiento">Crecimiento</option>
+            <option value="floracion">Floración</option>
+            <option value="cosecha">Listo cosecha</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
+          <button class="btn-amber flex items-center gap-2 justify-center" onclick="openCultivoModal()">
+            <i class="fa-solid fa-plus"></i> Nuevo cultivo
+          </button>
+        </div>
+        <div id="cultivosGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <div id="cultivosEmpty" class="empty-state hidden">
+          <i class="fa-solid fa-leaf"></i>
+          <p class="font-bold text-lg mb-1">No hay cultivos</p>
+          <p class="text-sm">Registra tu primer cultivo</p>
+        </div>
+      </section>
+
+      <!-- CONTROL DIARIO -->
+      <section class="view hidden" id="view-control-diario">
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="flex-1">
+            <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha</label>
+            <input type="date" class="input mt-1" id="ctrlDate" onchange="renderControlDiario()">
+          </div>
+          <div class="flex-1">
+            <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cultivo</label>
+            <select class="select mt-1" id="ctrlCultivo" onchange="renderControlDiario()"></select>
+          </div>
+          <div class="flex items-end">
+            <button class="btn-amber flex items-center gap-2 w-full justify-center" onclick="openControlModal()">
+              <i class="fa-solid fa-plus"></i> Nuevo registro
+            </button>
+          </div>
+        </div>
+        
+        <div id="ctrlSummary" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
+        
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-display font-bold text-lg">Registros del día</h3>
+            <span class="badge badge-warning" id="ctrlCount">0 registros</span>
+          </div>
+          <div id="ctrlList" class="space-y-3"></div>
+          <div id="ctrlEmpty" class="empty-state hidden">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <p class="font-bold text-lg mb-1">Sin registros</p>
+            <p class="text-sm">No hay controles para esta fecha</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- COSECHAS -->
+      <section class="view hidden" id="view-cosechas">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <div class="stat-card" style="--glow: rgba(0, 217, 126, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Cosechas este mes</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent)]" id="cosMonthCount">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(255, 184, 77, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Kg cosechados (mes)</div>
+            <div class="text-2xl font-display font-bold text-[var(--warning)]" id="cosMonthKg">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(0, 184, 212, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Kg cosechados (año)</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent-2)]" id="cosYearKg">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(179, 136, 255, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Total cosechas</div>
+            <div class="text-2xl font-display font-bold text-[var(--purple)]" id="cosTotal">0</div>
+          </div>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-3 mb-5">
+          <div class="search-wrap flex-1">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" class="input" placeholder="Buscar cosecha..." id="cosSearch" oninput="renderCosechas()">
+          </div>
+          <button class="btn-amber flex items-center gap-2 justify-center" onclick="openCosechaModal()">
+            <i class="fa-solid fa-plus"></i> Registrar cosecha
+          </button>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="scroll-x">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-left text-[var(--muted)] text-xs uppercase tracking-wider">
+                  <th class="p-4">Fecha</th>
+                  <th class="p-4">Cultivo</th>
+                  <th class="p-4 text-center">Cantidad</th>
+                  <th class="p-4 text-center">Destino</th>
+                  <th class="p-4">Observaciones</th>
+                  <th class="p-4 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="cosechasTable"></tbody>
+            </table>
+          </div>
+          <div id="cosechasEmpty" class="empty-state hidden">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <p class="font-bold text-lg mb-1">No hay cosechas</p>
+            <p class="text-sm">Registra tu primera cosecha</p>
           </div>
         </div>
       </section>
@@ -686,7 +976,7 @@
       <!-- CATEGORÍAS -->
       <section class="view hidden" id="view-categories">
         <div class="flex justify-between items-center mb-5">
-          <p class="text-sm text-[var(--muted)]">Gestiona las categorías de tus productos</p>
+          <p class="text-sm text-[var(--muted)]">Gestiona las categorías de productos</p>
           <button class="btn-primary flex items-center gap-2" onclick="openCategoryModal()">
             <i class="fa-solid fa-plus"></i> Nueva categoría
           </button>
@@ -694,31 +984,68 @@
         <div id="categoriesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
       </section>
 
+      <!-- REPORTES -->
+      <section class="view hidden" id="view-reports">
+        <div class="flex gap-2 mb-5 overflow-x-auto pb-2">
+          <button class="filter-chip active" data-period="day" onclick="setReportPeriod('day')">Hoy</button>
+          <button class="filter-chip" data-period="week" onclick="setReportPeriod('week')">Semana</button>
+          <button class="filter-chip" data-period="month" onclick="setReportPeriod('month')">Mes</button>
+          <button class="filter-chip" data-period="year" onclick="setReportPeriod('year')">Año</button>
+          <button class="filter-chip" data-period="all" onclick="setReportPeriod('all')">Todo</button>
+        </div>
+        
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          <div class="stat-card" style="--glow: rgba(0, 217, 126, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Ventas</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent)]" id="repSales">S/ 0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(0, 184, 212, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Compras</div>
+            <div class="text-2xl font-display font-bold text-[var(--accent-2)]" id="repPurchases">S/ 0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(255, 184, 77, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Cosechas (kg)</div>
+            <div class="text-2xl font-display font-bold text-[var(--warning)]" id="repHarvest">0</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(179, 136, 255, 0.2)">
+            <div class="text-xs text-[var(--muted)] uppercase">Balance</div>
+            <div class="text-2xl font-display font-bold text-[var(--purple)]" id="repBalance">S/ 0</div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="card p-5">
+            <h3 class="font-display font-bold text-lg mb-4">Ventas vs Compras</h3>
+            <div class="chart-wrap"><canvas id="chartReport1"></canvas></div>
+          </div>
+          <div class="card p-5">
+            <h3 class="font-display font-bold text-lg mb-4">Producción por especie</h3>
+            <div class="chart-wrap"><canvas id="chartReport2"></canvas></div>
+          </div>
+        </div>
+      </section>
+
     </div>
   </main>
 </div>
 
-<!-- Floating Action Button (mobile) -->
 <button class="fab" onclick="quickAdd()" aria-label="Agregar">
   <i class="fa-solid fa-plus"></i>
 </button>
 
-<!-- Toast container -->
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- MODALES -->
 <div class="modal-backdrop" id="modalProduct">
   <div class="modal">
     <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
-      <h3 class="font-display font-bold text-lg" id="productModalTitle">Nuevo producto</h3>
-      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalProduct')">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+      <h3 class="font-display font-bold text-lg" id="productModalTitle">Nuevo producto general</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalProduct')"><i class="fa-solid fa-xmark text-xl"></i></button>
     </div>
     <div class="p-5 space-y-4">
       <div>
         <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Nombre del producto *</label>
-        <input type="text" class="input mt-1" id="pName" placeholder="Ej: Micronutriente Quelatado (Gramos)">
+        <input type="text" class="input mt-1" id="pName" placeholder="Ej: Lechuga hidropónica">
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
@@ -728,14 +1055,10 @@
         <div>
           <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Unidad</label>
           <select class="select mt-1" id="pUnit">
-            <option value="unidad">Unidad</option>
-            <option value="metro">Metro</option>
-            <option value="kg">Kilogramo</option>
-            <option value="gramo">Gramo</option>
-            <option value="litro">Litro</option>
-            <option value="caja">Caja</option>
-            <option value="paquete">Paquete</option>
-            <option value="rollo">Rollo</option>
+            <option value="unidad">Unidad</option><option value="metro">Metro</option>
+            <option value="kg">Kilogramo</option><option value="gramo">Gramo</option>
+            <option value="litro">Litro</option><option value="caja">Caja</option>
+            <option value="paquete">Paquete</option><option value="rollo">Rollo</option>
             <option value="galon">Galón</option>
           </select>
         </div>
@@ -751,10 +1074,7 @@
         </div>
         <div>
           <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Moneda</label>
-          <select class="select mt-1" id="pCurrency">
-            <option value="PEN">Soles (S/)</option>
-            <option value="USD">Dólares ($)</option>
-          </select>
+          <select class="select mt-1" id="pCurrency"><option value="PEN">S/</option><option value="USD">$</option></select>
         </div>
       </div>
       <div>
@@ -773,13 +1093,354 @@
   </div>
 </div>
 
+<!-- MODAL MATERIAL INTERNO -->
+<div class="modal-backdrop" id="modalInternal">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg" id="internalModalTitle">Nuevo material interno</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalInternal')"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Nombre del material *</label>
+        <input type="text" class="input mt-1" id="iName" placeholder="Ej: Bomba de agua 1HP">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Categoría</label>
+          <select class="select mt-1" id="iCategory">
+            <option value="Herramientas">Herramientas</option>
+            <option value="Equipos">Equipos</option>
+            <option value="Insumos Operación">Insumos Operación</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Bioinsumos">Bioinsumos</option>
+            <option value="Otros">Otros</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Unidad</label>
+          <select class="select mt-1" id="iUnit">
+            <option value="unidad">Unidad</option><option value="metro">Metro</option>
+            <option value="kg">Kilogramo</option><option value="gramo">Gramo</option>
+            <option value="litro">Litro</option><option value="ml">Mililitro</option>
+            <option value="caja">Caja</option><option value="paquete">Paquete</option>
+            <option value="rollo">Rollo</option><option value="galon">Galón</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Stock *</label>
+          <input type="number" min="0" step="any" class="input mt-1" id="iStock" placeholder="0">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Stock mín.</label>
+          <input type="number" min="0" step="any" class="input mt-1" id="iMinStock" placeholder="0">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Ubicación</label>
+        <input type="text" class="input mt-1" id="iLocation" placeholder="Ej: Almacén B - Estante 3">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Notas</label>
+        <textarea class="textarea mt-1" id="iNotes" rows="2" placeholder="Observaciones..."></textarea>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalInternal')">Cancelar</button>
+      <button class="btn-purple flex-1" onclick="saveInternal()">Guardar material</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MOVIMIENTO INTERNO -->
+<div class="modal-backdrop" id="modalInternalMove">
+  <div class="modal" style="max-width:480px">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg">Movimiento interno</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalInternalMove')"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Material *</label>
+        <select class="select mt-1" id="imMaterial"></select>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Tipo *</label>
+          <select class="select mt-1" id="imType">
+            <option value="entrada">Entrada (+)</option>
+            <option value="salida">Salida (−)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cantidad *</label>
+          <input type="number" min="0.001" step="any" class="input mt-1" id="imQty" placeholder="0">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Motivo</label>
+        <input type="text" class="input mt-1" id="imReason" placeholder="Ej: Uso en cultivo, mantenimiento...">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha</label>
+        <input type="date" class="input mt-1" id="imDate">
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalInternalMove')">Cancelar</button>
+      <button class="btn-purple flex-1" onclick="saveInternalMove()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALMÁCIGO -->
+<div class="modal-backdrop" id="modalAlmacigo">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg" id="almacigoModalTitle">Nuevo almácigo</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalAlmacigo')"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Especie *</label>
+          <input type="text" class="input mt-1" id="aEspecie" placeholder="Ej: Lechuga">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Variedad</label>
+          <input type="text" class="input mt-1" id="aVariedad" placeholder="Ej: Batavia">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cantidad sembrada *</label>
+          <input type="number" min="1" step="1" class="input mt-1" id="aCantidad" placeholder="0">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Bandeja</label>
+          <input type="text" class="input mt-1" id="aBandeja" placeholder="Ej: Bandeja #1 - 60 alvéolos">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha siembra *</label>
+          <input type="date" class="input mt-1" id="aFecha">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Días estim. trasplante</label>
+          <input type="number" min="1" class="input mt-1" id="aDias" value="21">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Sustrato</label>
+        <select class="select mt-1" id="aSustrato">
+          <option value="Turba">Turba</option>
+          <option value="Vermiculita">Vermiculita</option>
+          <option value="Perlita">Perlita</option>
+          <option value="Mezcla turba+perlita">Mezcla turba+perlita</option>
+          <option value="Lana de roca">Lana de roca</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Observaciones</label>
+        <textarea class="textarea mt-1" id="aObs" rows="2" placeholder="Notas del almácigo..."></textarea>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalAlmacigo')">Cancelar</button>
+      <button class="btn-amber flex-1" onclick="saveAlmacigo()">Guardar almácigo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CULTIVO -->
+<div class="modal-backdrop" id="modalCultivo">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg" id="cultivoModalTitle">Nuevo cultivo</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalCultivo')"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Especie *</label>
+          <input type="text" class="input mt-1" id="cEspecie" placeholder="Ej: Lechuga">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Variedad</label>
+          <input type="text" class="input mt-1" id="cVariedad" placeholder="Ej: Batavia">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">N° Plantas *</label>
+          <input type="number" min="1" class="input mt-1" id="cPlantas" placeholder="0">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Ubicación</label>
+          <input type="text" class="input mt-1" id="cUbicacion" placeholder="Ej: Módulo NFT #1">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha inicio *</label>
+          <input type="date" class="input mt-1" id="cFecha">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Etapa</label>
+          <select class="select mt-1" id="cEtapa">
+            <option value="crecimiento">Crecimiento</option>
+            <option value="floracion">Floración</option>
+            <option value="cosecha">Listo para cosecha</option>
+            <option value="finalizado">Finalizado</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Sistema</label>
+        <select class="select mt-1" id="cSistema">
+          <option value="NFT">NFT</option>
+          <option value="DWC">DWC</option>
+          <option value="Ebb and Flow">Ebb and Flow</option>
+          <option value="Aeroponia">Aeroponia</option>
+          <option value="Goteo">Goteo</option>
+          <option value="Tierra">Tierra</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Notas</label>
+        <textarea class="textarea mt-1" id="cNotas" rows="2" placeholder="Observaciones..."></textarea>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalCultivo')">Cancelar</button>
+      <button class="btn-amber flex-1" onclick="saveCultivo()">Guardar cultivo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTROL DIARIO -->
+<div class="modal-backdrop" id="modalControl">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg">Control diario</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalControl')"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha *</label>
+          <input type="date" class="input mt-1" id="ctrlModalDate">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cultivo *</label>
+          <select class="select mt-1" id="ctrlModalCultivo"></select>
+        </div>
+      </div>
+      <div class="param-grid">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">pH</label>
+          <input type="number" step="0.01" min="0" max="14" class="input mt-1" id="ctrlPh" placeholder="6.0">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">EC (mS/cm)</label>
+          <input type="number" step="0.01" min="0" class="input mt-1" id="ctrlEc" placeholder="1.5">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Temp °C</label>
+          <input type="number" step="0.1" class="input mt-1" id="ctrlTemp" placeholder="22">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Humedad %</label>
+          <input type="number" step="1" min="0" max="100" class="input mt-1" id="ctrlHum" placeholder="65">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Altura cm</label>
+          <input type="number" step="0.1" min="0" class="input mt-1" id="ctrlAltura" placeholder="0">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Agua (L)</label>
+          <input type="number" step="0.1" min="0" class="input mt-1" id="ctrlAgua" placeholder="0">
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Nutrientes aplicados</label>
+        <textarea class="textarea mt-1" id="ctrlNutrientes" rows="2" placeholder="Ej: Solución A 5ml, Solución B 5ml..."></textarea>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Observaciones</label>
+        <textarea class="textarea mt-1" id="ctrlObs" rows="2" placeholder="Estado general, plagas, enfermedades..."></textarea>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalControl')">Cancelar</button>
+      <button class="btn-amber flex-1" onclick="saveControl()">Guardar registro</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COSECHA -->
+<div class="modal-backdrop" id="modalCosecha">
+  <div class="modal">
+    <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-display font-bold text-lg">Registrar cosecha</h3>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalCosecha')"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Fecha *</label>
+          <input type="date" class="input mt-1" id="coFecha">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cultivo *</label>
+          <select class="select mt-1" id="coCultivo"></select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Cantidad (kg) *</label>
+          <input type="number" step="0.01" min="0" class="input mt-1" id="coCantidad" placeholder="0.00">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Destino</label>
+          <select class="select mt-1" id="coDestino">
+            <option value="Venta">Venta</option>
+            <option value="Autoconsumo">Autoconsumo</option>
+            <option value="Donación">Donación</option>
+            <option value="Desecho">Desecho</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Calidad</label>
+        <select class="select mt-1" id="coCalidad">
+          <option value="Excelente">Excelente</option>
+          <option value="Buena">Buena</option>
+          <option value="Regular">Regular</option>
+          <option value="Mala">Mala</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Observaciones</label>
+        <textarea class="textarea mt-1" id="coObs" rows="2" placeholder="Notas de cosecha..."></textarea>
+      </div>
+    </div>
+    <div class="p-5 border-t border-[var(--border)] flex gap-3">
+      <button class="btn-ghost flex-1" onclick="closeModal('modalCosecha')">Cancelar</button>
+      <button class="btn-amber flex-1" onclick="saveCosecha()">Guardar cosecha</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modalSupplier">
   <div class="modal">
     <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
       <h3 class="font-display font-bold text-lg" id="supplierModalTitle">Nuevo proveedor</h3>
-      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalSupplier')">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalSupplier')"><i class="fa-solid fa-xmark text-xl"></i></button>
     </div>
     <div class="p-5 space-y-4">
       <div class="grid grid-cols-2 gap-3">
@@ -807,8 +1468,8 @@
         <input type="text" class="input mt-1" id="sAddress" placeholder="Av. Principal 123, Lima">
       </div>
       <div>
-        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Productos que ofrece y precios</label>
-        <textarea class="textarea mt-1" id="sProducts" rows="4" placeholder="Ej:&#10;Tubo PVC 4'' - S/ 25.00&#10;Bomba de agua 1HP - $85.00"></textarea>
+        <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Productos que ofrece</label>
+        <textarea class="textarea mt-1" id="sProducts" rows="4" placeholder="Ej:&#10;Tubo PVC 4'' - S/ 25.00&#10;Bomba 1HP - $85.00"></textarea>
       </div>
     </div>
     <div class="p-5 border-t border-[var(--border)] flex gap-3">
@@ -822,9 +1483,7 @@
   <div class="modal">
     <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
       <h3 class="font-display font-bold text-lg">Registrar compra</h3>
-      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalPurchase')">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalPurchase')"><i class="fa-solid fa-xmark text-xl"></i></button>
     </div>
     <div class="p-5 space-y-4">
       <div>
@@ -833,9 +1492,7 @@
       </div>
       <div>
         <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Proveedor</label>
-        <select class="select mt-1" id="puSupplier">
-          <option value="">Sin proveedor</option>
-        </select>
+        <select class="select mt-1" id="puSupplier"><option value="">Sin proveedor</option></select>
       </div>
       <div class="grid grid-cols-3 gap-3">
         <div>
@@ -848,10 +1505,7 @@
         </div>
         <div>
           <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Moneda</label>
-          <select class="select mt-1" id="puCurrency">
-            <option value="PEN">S/</option>
-            <option value="USD">$</option>
-          </select>
+          <select class="select mt-1" id="puCurrency"><option value="PEN">S/</option><option value="USD">$</option></select>
         </div>
       </div>
       <div>
@@ -874,9 +1528,7 @@
   <div class="modal">
     <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
       <h3 class="font-display font-bold text-lg">Registrar venta</h3>
-      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalSale')">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalSale')"><i class="fa-solid fa-xmark text-xl"></i></button>
     </div>
     <div class="p-5 space-y-4">
       <div>
@@ -899,10 +1551,7 @@
         </div>
         <div>
           <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">Moneda</label>
-          <select class="select mt-1" id="saCurrency">
-            <option value="PEN">S/</option>
-            <option value="USD">$</option>
-          </select>
+          <select class="select mt-1" id="saCurrency"><option value="PEN">S/</option><option value="USD">$</option></select>
         </div>
       </div>
       <div>
@@ -922,12 +1571,10 @@
 </div>
 
 <div class="modal-backdrop" id="modalCategory">
-  <div class="modal">
+  <div class="modal" style="max-width: 420px">
     <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
       <h3 class="font-display font-bold text-lg">Nueva categoría</h3>
-      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalCategory')">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalCategory')"><i class="fa-solid fa-xmark text-xl"></i></button>
     </div>
     <div class="p-5 space-y-4">
       <div>
@@ -959,12 +1606,10 @@
   <div class="modal" style="max-width: 420px">
     <div class="p-5 border-b border-[var(--border)] flex items-center justify-between">
       <h3 class="font-display font-bold text-lg">Tipo de cambio</h3>
-      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalExchange')">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+      <button class="text-[var(--muted)] hover:text-[var(--fg)]" onclick="closeModal('modalExchange')"><i class="fa-solid fa-xmark text-xl"></i></button>
     </div>
     <div class="p-5 space-y-4">
-      <p class="text-sm text-[var(--muted)]">Define el valor de 1 dólar en soles peruanos. Se usará para conversiones automáticas.</p>
+      <p class="text-sm text-[var(--muted)]">Define el valor de 1 dólar en soles peruanos.</p>
       <div>
         <label class="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider">1 USD =</label>
         <div class="flex items-center gap-2 mt-1">
@@ -981,11 +1626,9 @@
 </div>
 
 <script>
-// ========== SEGURIDAD ==========
 function verificarAcceso() {
   const pinIngresado = document.getElementById('pin-acceso').value;
   const PIN_SECRETO = "7070"; 
-  
   if (pinIngresado === PIN_SECRETO) {
     document.getElementById('pantalla-bloqueo').style.display = 'none';
   } else {
@@ -994,21 +1637,23 @@ function verificarAcceso() {
   }
 }
 
-/* =====================================================
-   HydroStock - Sistema de Inventario Hidropónico
-   Almacenamiento: FIREBASE REALTIME DATABASE ☁️
-   ===================================================== */
-
 const state = {
   products: [],
+  internalItems: [],
+  internalMoves: [],
   suppliers: [],
   purchases: [],
   sales: [],
   categories: [],
+  almacigos: [],
+  cultivos: [],
+  controles: [],
+  cosechas: [],
   currentCurrency: 'PEN',
   exchangeRate: 3.75,
   editingId: null,
-  selectedIcon: 'fa-circle'
+  selectedIcon: 'fa-circle',
+  reportPeriod: 'day'
 };
 
 const defaultCategories = [
@@ -1017,10 +1662,8 @@ const defaultCategories = [
   { id: 'cat_insumos', name: 'Nutrición Vegetal', icon: 'fa-flask' },
   { id: 'cat_herramientas', name: 'Equipos Técnicos', icon: 'fa-screwdriver-wrench' }
 ];
-
 </script>
 
-<!-- ========== FIREBASE INTEGRATION ========== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
   import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
@@ -1037,16 +1680,22 @@ const defaultCategories = [
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  const dbRef = ref(db, 'hydrostock_cloud_data');
+  const dbRef = ref(db, 'hydrostock_cloud_data_v2');
 
   window.saveData = function() {
     try {
       const dataToSave = {
         products: state.products,
+        internalItems: state.internalItems,
+        internalMoves: state.internalMoves,
         suppliers: state.suppliers,
         purchases: state.purchases,
         sales: state.sales,
         categories: state.categories,
+        almacigos: state.almacigos,
+        cultivos: state.cultivos,
+        controles: state.controles,
+        cosechas: state.cosechas,
         exchangeRate: state.exchangeRate,
         savedAt: new Date().toISOString()
       };
@@ -1063,22 +1712,23 @@ const defaultCategories = [
     const cloudData = snapshot.val();
     if (cloudData) {
       state.products = cloudData.products || [];
+      state.internalItems = cloudData.internalItems || [];
+      state.internalMoves = cloudData.internalMoves || [];
       state.suppliers = cloudData.suppliers || [];
       state.purchases = cloudData.purchases || [];
       state.sales = cloudData.sales || [];
       state.categories = cloudData.categories || defaultCategories;
+      state.almacigos = cloudData.almacigos || [];
+      state.cultivos = cloudData.cultivos || [];
+      state.controles = cloudData.controles || [];
+      state.cosechas = cloudData.cosechas || [];
       state.exchangeRate = cloudData.exchangeRate || 3.75;
       
       document.getElementById('exchangeRate').textContent = state.exchangeRate.toFixed(2);
       document.getElementById('exchangeRateMobile').textContent = state.exchangeRate.toFixed(2);
       document.getElementById('storageSize').textContent = 'Conectado a la Nube ☁️';
 
-      renderDashboard();
-      if (!document.getElementById('view-inventory').classList.contains('hidden')) renderInventory();
-      if (!document.getElementById('view-suppliers').classList.contains('hidden')) renderSuppliers();
-      if (!document.getElementById('view-purchases').classList.contains('hidden')) renderPurchases();
-      if (!document.getElementById('view-sales').classList.contains('hidden')) renderSales();
-      if (!document.getElementById('view-categories').classList.contains('hidden')) renderCategories();
+      refreshCurrentView();
     } else {
       state.categories = [...defaultCategories];
       window.saveData();
@@ -1087,15 +1737,6 @@ const defaultCategories = [
 </script>
 
 <script>
-// ========== RESTO DE FUNCIONES DE LA APP ==========
-function loadData() {
-  document.getElementById('storageSize').textContent = 'Conectando...';
-}
-
-function updateStorageInfo() {
-  // Manejado por Firebase ahora
-}
-
 function uid() { return 'id_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
 
 function formatMoney(amount, currency) {
@@ -1111,8 +1752,14 @@ function convertCurrency(amount, from, to) {
 }
 
 function formatDate(iso) {
+  if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function daysBetween(d1, d2) {
+  const diff = Math.abs(new Date(d2) - new Date(d1));
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
 function getCategoryName(id) {
@@ -1130,7 +1777,8 @@ function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.className = 'toast toast-' + type;
   const icon = type === 'error' ? 'fa-circle-exclamation' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-check';
-  toast.innerHTML = `<i class="fa-solid ${icon} text-[var(--${type === 'success' ? 'accent' : type})]"></i><span class="text-sm">${message}</span>`;
+  const colorVar = type === 'success' ? 'accent' : type;
+  toast.innerHTML = `<i class="fa-solid ${icon} text-[var(--${colorVar})]"></i><span class="text-sm">${message}</span>`;
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.animation = 'toastOut 0.3s ease forwards';
@@ -1138,23 +1786,50 @@ function showToast(message, type = 'success') {
   }, 3500);
 }
 
+function refreshCurrentView() {
+  const visibleView = document.querySelector('.view:not(.hidden)');
+  if (!visibleView) return;
+  const id = visibleView.id.replace('view-', '');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'inventory') renderInventory();
+  if (id === 'internal') renderInternal();
+  if (id === 'internal-moves') renderInternalMoves();
+  if (id === 'almacigo') renderAlmacigo();
+  if (id === 'cultivos') renderCultivos();
+  if (id === 'control-diario') renderControlDiario();
+  if (id === 'cosechas') renderCosechas();
+  if (id === 'suppliers') renderSuppliers();
+  if (id === 'purchases') renderPurchases();
+  if (id === 'sales') renderSales();
+  if (id === 'categories') renderCategories();
+  if (id === 'reports') renderReports();
+}
+
 function navigate(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('view-' + view).classList.remove('hidden');
-  document.getElementById('view-' + view).classList.add('fade-in');
-  
+  const el = document.getElementById('view-' + view);
+  if (el) {
+    el.classList.remove('hidden');
+    el.classList.add('fade-in');
+  }
   const navBtn = document.querySelector(`[data-view="${view}"]`);
   if(navBtn) navBtn.classList.add('active');
   
   const titles = {
-    dashboard: ['Dashboard', 'Resumen general de tu inventario hidropónico'],
-    inventory: ['Inventario', 'Gestiona tus productos y materiales'],
-    suppliers: ['Proveedores', 'Administra tus contactos y precios'],
-    purchases: ['Compras', 'Registro de compras a proveedores'],
-    sales: ['Ventas', 'Registro de ventas realizadas'],
-    categories: ['Categorías', 'Organiza tus productos por categoría'],
-    sync: ['Sincronización', 'Respalda y comparte tus datos entre dispositivos']
+    dashboard: ['Dashboard', 'Resumen general del sistema'],
+    inventory: ['Inventario General', 'Productos para venta'],
+    internal: ['Materiales Internos', 'Inventario de uso propio'],
+    'internal-moves': ['Movimientos Internos', 'Entradas y salidas de materiales'],
+    almacigo: ['Almácigos', 'Control de siembra de semillas'],
+    cultivos: ['Cultivos Activos', 'Plantas en producción'],
+    'control-diario': ['Control Diario', 'Parámetros diarios de cultivo'],
+    cosechas: ['Cosechas', 'Registro de cosechas'],
+    suppliers: ['Proveedores', 'Administra tus contactos'],
+    purchases: ['Compras', 'Registro de compras'],
+    sales: ['Ventas', 'Registro de ventas'],
+    categories: ['Categorías', 'Organiza tus productos'],
+    reports: ['Reportes', 'Análisis por día, mes y año']
   };
   
   if(titles[view]) {
@@ -1162,12 +1837,7 @@ function navigate(view) {
     document.getElementById('pageSubtitle').textContent = titles[view][1];
   }
   
-  if (view === 'dashboard') renderDashboard();
-  if (view === 'inventory') renderInventory();
-  if (view === 'suppliers') renderSuppliers();
-  if (view === 'purchases') renderPurchases();
-  if (view === 'sales') renderSales();
-  if (view === 'categories') renderCategories();
+  refreshCurrentView();
   
   if (window.innerWidth < 1024) {
     document.getElementById('sidebar').classList.remove('open');
@@ -1182,13 +1852,10 @@ function toggleSidebar() {
 
 function setCurrency(cur) {
   state.currentCurrency = cur;
-  document.querySelectorAll('[data-cur]').forEach(b => {
-    b.classList.toggle('active', b.dataset.cur === cur);
-  });
+  document.querySelectorAll('[data-cur]').forEach(b => b.classList.toggle('active', b.dataset.cur === cur));
   document.getElementById('statCurrencyBadge').textContent = cur;
   document.getElementById('financeBadge').textContent = cur;
-  renderDashboard();
-  if (!document.getElementById('view-inventory').classList.contains('hidden')) renderInventory();
+  refreshCurrentView();
 }
 
 function openExchangeModal() {
@@ -1205,7 +1872,7 @@ function saveExchange() {
   if (window.saveData) window.saveData();
   closeModal('modalExchange');
   showToast('Tipo de cambio actualizado');
-  renderDashboard();
+  refreshCurrentView();
 }
 
 function closeModal(id) {
@@ -1215,6 +1882,7 @@ function closeModal(id) {
 
 function quickAdd() { openProductModal(); }
 
+// ============= PRODUCTOS GENERALES =============
 function openProductModal(id = null) {
   state.editingId = id;
   const select = document.getElementById('pCategory');
@@ -1234,12 +1902,8 @@ function openProductModal(id = null) {
       document.getElementById('pDesc').value = p.description || '';
     }
   } else {
-    document.getElementById('productModalTitle').textContent = 'Nuevo producto';
-    document.getElementById('pName').value = '';
-    document.getElementById('pStock').value = '';
-    document.getElementById('pMinStock').value = '';
-    document.getElementById('pPrice').value = '';
-    document.getElementById('pDesc').value = '';
+    document.getElementById('productModalTitle').textContent = 'Nuevo producto general';
+    ['pName','pStock','pMinStock','pPrice','pDesc'].forEach(x => document.getElementById(x).value = '');
     document.getElementById('pUnit').value = 'unidad';
     document.getElementById('pCurrency').value = state.currentCurrency;
   }
@@ -1257,30 +1921,23 @@ function saveProduct() {
   const description = document.getElementById('pDesc').value.trim();
   
   if (!name) { showToast('Ingresa el nombre del producto', 'error'); return; }
-  if (price < 0) { showToast('Precio inválido', 'error'); return; }
   
   if (state.editingId) {
     const p = state.products.find(x => x.id === state.editingId);
     if (p) {
-      p.name = name; p.category = category; p.stock = stock; p.minStock = minStock;
-      p.price = price; p.currency = currency; p.unit = unit; p.description = description;
+      Object.assign(p, { name, category, stock, minStock, price, currency, unit, description });
     }
     showToast('Producto actualizado');
   } else {
-    state.products.push({
-      id: uid(), name, category, stock, minStock, price, currency, unit, description,
-      createdAt: new Date().toISOString()
-    });
-    showToast('Producto agregado al inventario');
+    state.products.push({ id: uid(), name, category, stock, minStock, price, currency, unit, description, createdAt: new Date().toISOString() });
+    showToast('Producto agregado');
   }
   if (window.saveData) window.saveData();
   closeModal('modalProduct');
 }
 
 function deleteProduct(id) {
-  const p = state.products.find(x => x.id === id);
-  if (!p) return;
-  if (confirm(`¿Eliminar "${p.name}" del inventario?`)) {
+  if (confirm('¿Eliminar este producto?')) {
     state.products = state.products.filter(x => x.id !== id);
     if (window.saveData) window.saveData();
     showToast('Producto eliminado', 'warning');
@@ -1288,17 +1945,19 @@ function deleteProduct(id) {
 }
 
 function renderInventory() {
-  const search = document.getElementById('invSearch').value.toLowerCase();
-  const catFilter = document.getElementById('invCategoryFilter').value;
+  const search = (document.getElementById('invSearch')?.value || '').toLowerCase();
+  const catFilter = document.getElementById('invCategoryFilter')?.value || '';
   const catSelect = document.getElementById('invCategoryFilter');
   
-  if (catSelect.children.length !== state.categories.length + 1) {
-    catSelect.innerHTML = '<option value="">Todas las categorías</option>' + 
-      state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+  if (catSelect) {
+    const expectedLen = state.categories.length + 1;
+    if (catSelect.children.length !== expectedLen) {
+      catSelect.innerHTML = '<option value="">Todas las categorías</option>' + state.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
   }
   
   let filtered = state.products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search) || (p.description && p.description.toLowerCase().includes(search));
+    const matchSearch = p.name.toLowerCase().includes(search) || (p.description || '').toLowerCase().includes(search);
     const matchCat = !catFilter || p.category === catFilter;
     return matchSearch && matchCat;
   });
@@ -1306,13 +1965,10 @@ function renderInventory() {
   const tbody = document.getElementById('inventoryTable');
   const empty = document.getElementById('inventoryEmpty');
   
-  if (filtered.length === 0) {
-    tbody.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
-  }
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
   
+  const curSymbol = state.currentCurrency === 'PEN' ? 'S/' : '$';
   tbody.innerHTML = filtered.map(p => {
     const stockStatus = p.stock <= 0 ? '<span class="badge badge-danger">Sin stock</span>' :
                         p.stock <= (p.minStock || 0) ? '<span class="badge badge-warning">Stock bajo</span>' :
@@ -1320,8 +1976,6 @@ function renderInventory() {
     const totalValue = p.stock * p.price;
     const displayPrice = state.currentCurrency === p.currency ? p.price : convertCurrency(p.price, p.currency, state.currentCurrency);
     const displayTotal = state.currentCurrency === p.currency ? totalValue : convertCurrency(totalValue, p.currency, state.currentCurrency);
-    const curSymbol = state.currentCurrency === 'PEN' ? 'S/' : '$';
-    
     return `
       <tr class="table-row border-b border-[var(--border)]">
         <td class="p-4">
@@ -1331,7 +1985,7 @@ function renderInventory() {
             </div>
             <div>
               <div class="font-semibold">${p.name}</div>
-              <div class="text-xs text-[var(--muted)]">${p.unit || 'unidad'} · ${p.currency === 'PEN' ? 'S/' : '$'} ${p.price.toFixed(2)}</div>
+              <div class="text-xs text-[var(--muted)]">${p.unit || 'unidad'}</div>
             </div>
           </div>
         </td>
@@ -1342,8 +1996,8 @@ function renderInventory() {
         <td class="p-4 text-center">${stockStatus}</td>
         <td class="p-4">
           <div class="flex items-center justify-center gap-2">
-            <button class="btn-ghost !p-2" onclick="openProductModal('${p.id}')" title="Editar"><i class="fa-solid fa-pen text-xs"></i></button>
-            <button class="btn-danger !p-2" onclick="deleteProduct('${p.id}')" title="Eliminar"><i class="fa-solid fa-trash text-xs"></i></button>
+            <button class="btn-ghost !p-2" onclick="openProductModal('${p.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button class="btn-danger !p-2" onclick="deleteProduct('${p.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
           </div>
         </td>
       </tr>
@@ -1351,6 +2005,585 @@ function renderInventory() {
   }).join('');
 }
 
+// ============= MATERIALES INTERNOS =============
+function openInternalModal(id = null) {
+  state.editingId = id;
+  if (id) {
+    const it = state.internalItems.find(x => x.id === id);
+    if (it) {
+      document.getElementById('internalModalTitle').textContent = 'Editar material';
+      document.getElementById('iName').value = it.name;
+      document.getElementById('iCategory').value = it.category || 'Herramientas';
+      document.getElementById('iUnit').value = it.unit || 'unidad';
+      document.getElementById('iStock').value = it.stock;
+      document.getElementById('iMinStock').value = it.minStock || 0;
+      document.getElementById('iLocation').value = it.location || '';
+      document.getElementById('iNotes').value = it.notes || '';
+    }
+  } else {
+    document.getElementById('internalModalTitle').textContent = 'Nuevo material interno';
+    ['iName','iStock','iMinStock','iLocation','iNotes'].forEach(x => document.getElementById(x).value = '');
+    document.getElementById('iCategory').value = 'Herramientas';
+    document.getElementById('iUnit').value = 'unidad';
+  }
+  document.getElementById('modalInternal').classList.add('active');
+}
+
+function saveInternal() {
+  const name = document.getElementById('iName').value.trim();
+  if (!name) { showToast('Ingresa el nombre del material', 'error'); return; }
+  const data = {
+    name,
+    category: document.getElementById('iCategory').value,
+    unit: document.getElementById('iUnit').value,
+    stock: parseFloat(document.getElementById('iStock').value) || 0,
+    minStock: parseFloat(document.getElementById('iMinStock').value) || 0,
+    location: document.getElementById('iLocation').value.trim(),
+    notes: document.getElementById('iNotes').value.trim()
+  };
+  if (state.editingId) {
+    const it = state.internalItems.find(x => x.id === state.editingId);
+    if (it) Object.assign(it, data);
+    showToast('Material actualizado');
+  } else {
+    state.internalItems.push({ id: uid(), ...data, createdAt: new Date().toISOString() });
+    showToast('Material interno agregado');
+  }
+  if (window.saveData) window.saveData();
+  closeModal('modalInternal');
+}
+
+function deleteInternal(id) {
+  if (confirm('¿Eliminar este material?')) {
+    state.internalItems = state.internalItems.filter(x => x.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Material eliminado', 'warning');
+  }
+}
+
+function renderInternal() {
+  const search = (document.getElementById('intSearch')?.value || '').toLowerCase();
+  const filtered = state.internalItems.filter(p => p.name.toLowerCase().includes(search));
+  const tbody = document.getElementById('internalTable');
+  const empty = document.getElementById('internalEmpty');
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  tbody.innerHTML = filtered.map(p => {
+    const stockStatus = p.stock <= 0 ? '<span class="badge badge-danger">Sin stock</span>' :
+                        p.stock <= (p.minStock || 0) ? '<span class="badge badge-warning">Stock bajo</span>' :
+                        '<span class="badge badge-purple">Disponible</span>';
+    return `
+      <tr class="table-row border-b border-[var(--border)]">
+        <td class="p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-[rgba(179,136,255,0.1)] flex items-center justify-center text-[var(--purple)]">
+              <i class="fa-solid fa-toolbox"></i>
+            </div>
+            <div>
+              <div class="font-semibold">${p.name}</div>
+              <div class="text-xs text-[var(--muted)]">${p.unit || 'unidad'} ${p.location ? '· '+p.location : ''}</div>
+            </div>
+          </div>
+        </td>
+        <td class="p-4 text-sm text-[var(--muted)]">${p.category || 'Otros'}</td>
+        <td class="p-4 text-center font-bold">${p.stock}</td>
+        <td class="p-4 text-center">${stockStatus}</td>
+        <td class="p-4 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <button class="btn-ghost !p-2" onclick="openInternalModal('${p.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
+            <button class="btn-danger !p-2" onclick="deleteInternal('${p.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ============= MOVIMIENTOS INTERNOS =============
+function openInternalMoveModal() {
+  if (state.internalItems.length === 0) { showToast('Primero registra materiales internos', 'warning'); return; }
+  const sel = document.getElementById('imMaterial');
+  sel.innerHTML = state.internalItems.map(i => `<option value="${i.id}">${i.name} (Stock: ${i.stock})</option>`).join('');
+  document.getElementById('imType').value = 'salida';
+  document.getElementById('imQty').value = '';
+  document.getElementById('imReason').value = '';
+  document.getElementById('imDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modalInternalMove').classList.add('active');
+}
+
+function saveInternalMove() {
+  const materialId = document.getElementById('imMaterial').value;
+  const type = document.getElementById('imType').value;
+  const qty = parseFloat(document.getElementById('imQty').value);
+  const reason = document.getElementById('imReason').value.trim();
+  const date = document.getElementById('imDate').value;
+  
+  if (!materialId || !qty || qty <= 0) { showToast('Completa los campos obligatorios', 'error'); return; }
+  
+  const item = state.internalItems.find(x => x.id === materialId);
+  if (type === 'salida' && item && qty > item.stock) {
+    if (!confirm(`Stock insuficiente (${item.stock}). ¿Continuar?`)) return;
+  }
+  
+  state.internalMoves.push({ id: uid(), materialId, type, qty, reason, date: date || new Date().toISOString().split('T')[0] });
+  if (item) {
+    if (type === 'entrada') item.stock += qty;
+    else item.stock = Math.max(0, item.stock - qty);
+  }
+  
+  if (window.saveData) window.saveData();
+  closeModal('modalInternalMove');
+  showToast('Movimiento registrado');
+}
+
+function deleteInternalMove(id) {
+  if (confirm('¿Eliminar este movimiento? NO se revertirá el stock.')) {
+    state.internalMoves = state.internalMoves.filter(x => x.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Movimiento eliminado', 'warning');
+  }
+}
+
+function renderInternalMoves() {
+  const search = (document.getElementById('intMoveSearch')?.value || '').toLowerCase();
+  let filtered = state.internalMoves.filter(m => {
+    const it = state.internalItems.find(x => x.id === m.materialId);
+    return (it?.name || '').toLowerCase().includes(search) || (m.reason || '').toLowerCase().includes(search);
+  }).sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const tbody = document.getElementById('internalMovesTable');
+  const empty = document.getElementById('internalMovesEmpty');
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  
+  tbody.innerHTML = filtered.map(m => {
+    const it = state.internalItems.find(x => x.id === m.materialId);
+    const typeBadge = m.type === 'entrada' 
+      ? '<span class="badge badge-success"><i class="fa-solid fa-arrow-down"></i> Entrada</span>'
+      : '<span class="badge badge-danger"><i class="fa-solid fa-arrow-up"></i> Salida</span>';
+    return `
+      <tr class="table-row border-b border-[var(--border)]">
+        <td class="p-4 text-sm">${formatDate(m.date)}</td>
+        <td class="p-4 font-semibold">${it?.name || 'Material eliminado'}</td>
+        <td class="p-4 text-center">${typeBadge}</td>
+        <td class="p-4 text-center font-bold ${m.type === 'entrada' ? 'text-[var(--accent)]' : 'text-[var(--danger)]'}">${m.type === 'entrada' ? '+' : '−'}${m.qty}</td>
+        <td class="p-4 text-sm text-[var(--muted)]">${m.reason || '—'}</td>
+        <td class="p-4 text-center"><button class="btn-danger !p-2" onclick="deleteInternalMove('${m.id}')"><i class="fa-solid fa-trash text-xs"></i></button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ============= ALMÁCIGOS =============
+function openAlmacigoModal(id = null) {
+  state.editingId = id;
+  if (id) {
+    const a = state.almacigos.find(x => x.id === id);
+    if (a) {
+      document.getElementById('almacigoModalTitle').textContent = 'Editar almácigo';
+      document.getElementById('aEspecie').value = a.especie;
+      document.getElementById('aVariedad').value = a.variedad || '';
+      document.getElementById('aCantidad').value = a.cantidad;
+      document.getElementById('aBandeja').value = a.bandeja || '';
+      document.getElementById('aFecha').value = a.fecha;
+      document.getElementById('aDias').value = a.diasEstimados || 21;
+      document.getElementById('aSustrato').value = a.sustrato || 'Turba';
+      document.getElementById('aObs').value = a.observaciones || '';
+    }
+  } else {
+    document.getElementById('almacigoModalTitle').textContent = 'Nuevo almácigo';
+    ['aEspecie','aVariedad','aCantidad','aBandeja','aObs'].forEach(x => document.getElementById(x).value = '');
+    document.getElementById('aFecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('aDias').value = 21;
+    document.getElementById('aSustrato').value = 'Turba';
+  }
+  document.getElementById('modalAlmacigo').classList.add('active');
+}
+
+function saveAlmacigo() {
+  const especie = document.getElementById('aEspecie').value.trim();
+  const cantidad = parseInt(document.getElementById('aCantidad').value);
+  if (!especie || !cantidad) { showToast('Especie y cantidad son obligatorias', 'error'); return; }
+  const data = {
+    especie,
+    variedad: document.getElementById('aVariedad').value.trim(),
+    cantidad,
+    bandeja: document.getElementById('aBandeja').value.trim(),
+    fecha: document.getElementById('aFecha').value,
+    diasEstimados: parseInt(document.getElementById('aDias').value) || 21,
+    sustrato: document.getElementById('aSustrato').value,
+    observaciones: document.getElementById('aObs').value.trim(),
+    estado: 'sembrado'
+  };
+  if (state.editingId) {
+    const a = state.almacigos.find(x => x.id === state.editingId);
+    if (a) Object.assign(a, data);
+    showToast('Almácigo actualizado');
+  } else {
+    state.almacigos.push({ id: uid(), ...data });
+    showToast('Almácigo registrado');
+  }
+  if (window.saveData) window.saveData();
+  closeModal('modalAlmacigo');
+}
+
+function deleteAlmacigo(id) { if (confirm('¿Eliminar este almácigo?')) { state.almacigos = state.almacigos.filter(x => x.id !== id); if (window.saveData) window.saveData(); showToast('Almácigo eliminado', 'warning'); } }
+
+function changeAlmacigoEstado(id, estado) {
+  const a = state.almacigos.find(x => x.id === id);
+  if (a) { a.estado = estado; if (window.saveData) window.saveData(); showToast(`Estado: ${estado}`); }
+}
+
+function renderAlmacigo() {
+  const search = (document.getElementById('almSearch')?.value || '').toLowerCase();
+  const filter = document.getElementById('almFilter')?.value || '';
+  let filtered = state.almacigos.filter(a => {
+    const matchSearch = a.especie.toLowerCase().includes(search) || (a.variedad || '').toLowerCase().includes(search);
+    const matchFilter = !filter || a.estado === filter;
+    return matchSearch && matchFilter;
+  }).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  
+  document.getElementById('almActiveCount').textContent = state.almacigos.filter(a => ['sembrado','germinado','listo'].includes(a.estado)).length;
+  document.getElementById('almReadyCount').textContent = state.almacigos.filter(a => a.estado === 'listo').length;
+  document.getElementById('almGerminatedCount').textContent = state.almacigos.filter(a => a.estado === 'germinado').length;
+  document.getElementById('almTotalCount').textContent = state.almacigos.length;
+  
+  const grid = document.getElementById('almacigoGrid');
+  const empty = document.getElementById('almacigoEmpty');
+  if (filtered.length === 0) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  
+  grid.innerHTML = filtered.map(a => {
+    const days = daysBetween(a.fecha, new Date().toISOString().split('T')[0]);
+    const ready = days >= (a.diasEstimados || 21);
+    const stageColor = a.estado === 'sembrado' ? 'badge-purple' : a.estado === 'germinado' ? 'badge-info' : a.estado === 'listo' ? 'badge-success' : a.estado === 'trasplantado' ? 'badge-warning' : 'badge-danger';
+    return `
+      <div class="card p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-[rgba(179,136,255,0.15)] flex items-center justify-center text-[var(--purple)] text-lg">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <span class="badge ${stageColor}">${a.estado}</span>
+        </div>
+        <h3 class="font-display font-bold text-base mb-0.5">${a.especie}</h3>
+        <p class="text-xs text-[var(--muted)] mb-3">${a.variedad || 'Sin variedad'}</p>
+        <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+          <div><div class="text-[var(--muted)]">Siembra</div><div class="font-semibold">${formatDate(a.fecha)}</div></div>
+          <div><div class="text-[var(--muted)]">Días</div><div class="font-semibold ${ready ? 'text-[var(--accent)]' : ''}">${days} días</div></div>
+          <div><div class="text-[var(--muted)]">Cantidad</div><div class="font-semibold">${a.cantidad}</div></div>
+          <div><div class="text-[var(--muted)]">Sustrato</div><div class="font-semibold">${a.sustrato || '—'}</div></div>
+        </div>
+        ${a.bandeja ? `<div class="text-xs mb-3"><i class="fa-solid fa-location-dot text-[var(--accent)]"></i> ${a.bandeja}</div>` : ''}
+        ${a.observaciones ? `<div class="text-xs text-[var(--muted)] mb-3 italic">"${a.observaciones}"</div>` : ''}
+        <div class="flex gap-1 mb-2 flex-wrap">
+          ${a.estado !== 'germinado' ? `<button class="filter-chip" onclick="changeAlmacigoEstado('${a.id}','germinado')">Germinado</button>` : ''}
+          ${a.estado !== 'listo' ? `<button class="filter-chip" onclick="changeAlmacigoEstado('${a.id}','listo')">Listo trasplante</button>` : ''}
+          ${a.estado !== 'trasplantado' ? `<button class="filter-chip" onclick="changeAlmacigoEstado('${a.id}','trasplantado')">Trasplantado</button>` : ''}
+        </div>
+        <div class="flex gap-2">
+          <button class="btn-ghost !p-2 flex-1" onclick="openAlmacigoModal('${a.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
+          <button class="btn-danger !p-2 flex-1" onclick="deleteAlmacigo('${a.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============= CULTIVOS =============
+function openCultivoModal(id = null) {
+  state.editingId = id;
+  if (id) {
+    const c = state.cultivos.find(x => x.id === id);
+    if (c) {
+      document.getElementById('cultivoModalTitle').textContent = 'Editar cultivo';
+      document.getElementById('cEspecie').value = c.especie;
+      document.getElementById('cVariedad').value = c.variedad || '';
+      document.getElementById('cPlantas').value = c.plantas;
+      document.getElementById('cUbicacion').value = c.ubicacion || '';
+      document.getElementById('cFecha').value = c.fecha;
+      document.getElementById('cEtapa').value = c.etapa || 'crecimiento';
+      document.getElementById('cSistema').value = c.sistema || 'NFT';
+      document.getElementById('cNotas').value = c.notas || '';
+    }
+  } else {
+    document.getElementById('cultivoModalTitle').textContent = 'Nuevo cultivo';
+    ['cEspecie','cVariedad','cPlantas','cUbicacion','cNotas'].forEach(x => document.getElementById(x).value = '');
+    document.getElementById('cFecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('cEtapa').value = 'crecimiento';
+    document.getElementById('cSistema').value = 'NFT';
+  }
+  document.getElementById('modalCultivo').classList.add('active');
+}
+
+function saveCultivo() {
+  const especie = document.getElementById('cEspecie').value.trim();
+  const plantas = parseInt(document.getElementById('cPlantas').value);
+  if (!especie || !plantas) { showToast('Especie y plantas son obligatorias', 'error'); return; }
+  const data = {
+    especie,
+    variedad: document.getElementById('cVariedad').value.trim(),
+    plantas,
+    ubicacion: document.getElementById('cUbicacion').value.trim(),
+    fecha: document.getElementById('cFecha').value,
+    etapa: document.getElementById('cEtapa').value,
+    sistema: document.getElementById('cSistema').value,
+    notas: document.getElementById('cNotas').value.trim()
+  };
+  if (state.editingId) {
+    const c = state.cultivos.find(x => x.id === state.editingId);
+    if (c) Object.assign(c, data);
+    showToast('Cultivo actualizado');
+  } else {
+    state.cultivos.push({ id: uid(), ...data });
+    showToast('Cultivo registrado');
+  }
+  if (window.saveData) window.saveData();
+  closeModal('modalCultivo');
+}
+
+function deleteCultivo(id) { if (confirm('¿Eliminar este cultivo?')) { state.cultivos = state.cultivos.filter(x => x.id !== id); if (window.saveData) window.saveData(); showToast('Cultivo eliminado', 'warning'); } }
+
+function renderCultivos() {
+  const search = (document.getElementById('culSearch')?.value || '').toLowerCase();
+  const filter = document.getElementById('culStageFilter')?.value || '';
+  let filtered = state.cultivos.filter(c => {
+    const matchSearch = c.especie.toLowerCase().includes(search) || (c.variedad || '').toLowerCase().includes(search);
+    const matchFilter = !filter || c.etapa === filter;
+    return matchSearch && matchFilter;
+  }).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  
+  document.getElementById('culActiveCount').textContent = state.cultivos.filter(c => c.etapa !== 'finalizado').length;
+  document.getElementById('culTotalPlants').textContent = state.cultivos.filter(c => c.etapa !== 'finalizado').reduce((s,c) => s+c.plantas, 0);
+  document.getElementById('culFlowering').textContent = state.cultivos.filter(c => c.etapa === 'floracion').length;
+  document.getElementById('culReady').textContent = state.cultivos.filter(c => c.etapa === 'cosecha').length;
+  
+  const grid = document.getElementById('cultivosGrid');
+  const empty = document.getElementById('cultivosEmpty');
+  if (filtered.length === 0) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  
+  grid.innerHTML = filtered.map(c => {
+    const days = daysBetween(c.fecha, new Date().toISOString().split('T')[0]);
+    const stageClass = c.etapa === 'crecimiento' ? 'stage-crecimiento' : c.etapa === 'floracion' ? 'stage-floracion' : c.etapa === 'cosecha' ? 'stage-cosecha' : 'badge-purple';
+    const stageText = c.etapa === 'crecimiento' ? 'Crecimiento' : c.etapa === 'floracion' ? 'Floración' : c.etapa === 'cosecha' ? 'Listo cosecha' : 'Finalizado';
+    return `
+      <div class="card p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="w-11 h-11 rounded-xl bg-[rgba(255,184,77,0.15)] flex items-center justify-center text-[var(--warning)] text-lg">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          <span class="stage-indicator ${stageClass}">${stageText}</span>
+        </div>
+        <h3 class="font-display font-bold text-base mb-0.5">${c.especie}</h3>
+        <p class="text-xs text-[var(--muted)] mb-3">${c.variedad || 'Sin variedad'} · ${c.sistema}</p>
+        <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+          <div><div class="text-[var(--muted)]">Inicio</div><div class="font-semibold">${formatDate(c.fecha)}</div></div>
+          <div><div class="text-[var(--muted)]">Días</div><div class="font-semibold text-[var(--accent)]">${days} días</div></div>
+          <div><div class="text-[var(--muted)]">Plantas</div><div class="font-semibold">${c.plantas}</div></div>
+          <div><div class="text-[var(--muted)]">Sistema</div><div class="font-semibold">${c.sistema}</div></div>
+        </div>
+        ${c.ubicacion ? `<div class="text-xs mb-3"><i class="fa-solid fa-location-dot text-[var(--accent)]"></i> ${c.ubicacion}</div>` : ''}
+        ${c.notas ? `<div class="text-xs text-[var(--muted)] mb-3 italic">"${c.notas}"</div>` : ''}
+        <div class="flex gap-2">
+          <button class="btn-ghost !p-2 flex-1" onclick="openCultivoModal('${c.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
+          <button class="btn-amber !p-2 flex-1" onclick="openControlModalForCultivo('${c.id}')"><i class="fa-solid fa-clipboard text-xs"></i></button>
+          <button class="btn-danger !p-2 flex-1" onclick="deleteCultivo('${c.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openControlModalForCultivo(cultivoId) {
+  openControlModal();
+  document.getElementById('ctrlModalCultivo').value = cultivoId;
+}
+
+// ============= CONTROL DIARIO =============
+function openControlModal() {
+  if (state.cultivos.length === 0) { showToast('Primero registra cultivos', 'warning'); return; }
+  const sel = document.getElementById('ctrlModalCultivo');
+  sel.innerHTML = state.cultivos.map(c => `<option value="${c.id}">${c.especie} ${c.variedad || ''} (${c.ubicacion || 'sin ubicación'})</option>`).join('');
+  document.getElementById('ctrlModalDate').value = new Date().toISOString().split('T')[0];
+  ['ctrlPh','ctrlEc','ctrlTemp','ctrlHum','ctrlAltura','ctrlAgua','ctrlNutrientes','ctrlObs'].forEach(x => document.getElementById(x).value = '');
+  document.getElementById('modalControl').classList.add('active');
+}
+
+function saveControl() {
+  const cultivoId = document.getElementById('ctrlModalCultivo').value;
+  const date = document.getElementById('ctrlModalDate').value;
+  if (!cultivoId || !date) { showToast('Cultivo y fecha obligatorios', 'error'); return; }
+  const data = {
+    cultivoId, date,
+    ph: parseFloat(document.getElementById('ctrlPh').value) || null,
+    ec: parseFloat(document.getElementById('ctrlEc').value) || null,
+    temp: parseFloat(document.getElementById('ctrlTemp').value) || null,
+    hum: parseFloat(document.getElementById('ctrlHum').value) || null,
+    altura: parseFloat(document.getElementById('ctrlAltura').value) || null,
+    agua: parseFloat(document.getElementById('ctrlAgua').value) || null,
+    nutrientes: document.getElementById('ctrlNutrientes').value.trim(),
+    observaciones: document.getElementById('ctrlObs').value.trim()
+  };
+  state.controles.push({ id: uid(), ...data });
+  if (window.saveData) window.saveData();
+  closeModal('modalControl');
+  showToast('Control diario registrado');
+  // Actualizar filtros
+  populateCtrlCultivoSelect();
+  renderControlDiario();
+}
+
+function deleteControl(id) {
+  if (confirm('¿Eliminar este registro?')) {
+    state.controles = state.controles.filter(x => x.id !== id);
+    if (window.saveData) window.saveData();
+    showToast('Registro eliminado', 'warning');
+    renderControlDiario();
+  }
+}
+
+function populateCtrlCultivoSelect() {
+  const sel = document.getElementById('ctrlCultivo');
+  if (!sel) return;
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">Todos los cultivos</option>' + state.cultivos.map(c => `<option value="${c.id}">${c.especie} ${c.variedad || ''}</option>`).join('');
+  sel.value = currentVal;
+}
+
+function renderControlDiario() {
+  populateCtrlCultivoSelect();
+  const date = document.getElementById('ctrlDate').value || new Date().toISOString().split('T')[0];
+  document.getElementById('ctrlDate').value = date;
+  const cultivoId = document.getElementById('ctrlCultivo').value;
+  
+  if (!document.getElementById('ctrlDate').value) document.getElementById('ctrlDate').value = new Date().toISOString().split('T')[0];
+  
+  let filtered = state.controles.filter(c => c.date === date);
+  if (cultivoId) filtered = filtered.filter(c => c.cultivoId === cultivoId);
+  
+  // Resumen
+  const summary = document.getElementById('ctrlSummary');
+  if (filtered.length > 0) {
+    const avg = (key) => filtered.filter(c => c[key] != null).reduce((s,c,i,arr) => s + c[key]/arr.length, 0);
+    const phVals = filtered.filter(c => c.ph != null);
+    const ecVals = filtered.filter(c => c.ec != null);
+    const tempVals = filtered.filter(c => c.temp != null);
+    summary.innerHTML = `
+      <div class="param-card"><div class="label">pH promedio</div><div class="value text-[var(--accent)]">${phVals.length ? (phVals.reduce((s,c)=>s+c.ph,0)/phVals.length).toFixed(2) : '—'}</div></div>
+      <div class="param-card"><div class="label">EC promedio</div><div class="value text-[var(--accent-2)]">${ecVals.length ? (ecVals.reduce((s,c)=>s+c.ec,0)/ecVals.length).toFixed(2) : '—'}</div></div>
+      <div class="param-card"><div class="label">Temp °C</div><div class="value text-[var(--warning)]">${tempVals.length ? (tempVals.reduce((s,c)=>s+c.temp,0)/tempVals.length).toFixed(1) : '—'}</div></div>
+      <div class="param-card"><div class="label">Registros</div><div class="value text-[var(--purple)]">${filtered.length}</div></div>
+    `;
+  } else {
+    summary.innerHTML = '<div class="param-card col-span-4"><div class="label">Sin datos para esta fecha</div></div>';
+  }
+  
+  document.getElementById('ctrlCount').textContent = `${filtered.length} registro(s)`;
+  
+  const list = document.getElementById('ctrlList');
+  const empty = document.getElementById('ctrlEmpty');
+  if (filtered.length === 0) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  
+  list.innerHTML = filtered.map(c => {
+    const cultivo = state.cultivos.find(x => x.id === c.cultivoId);
+    return `
+      <div class="bg-[var(--bg-2)] border border-[var(--border)] rounded-xl p-4">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <div class="font-semibold">${cultivo?.especie || 'Cultivo eliminado'} ${cultivo?.variedad || ''}</div>
+            <div class="text-xs text-[var(--muted)]">${cultivo?.ubicacion || ''} · ${formatDate(c.date)}</div>
+          </div>
+          <button class="btn-danger !p-1.5" onclick="deleteControl('${c.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
+        </div>
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-3">
+          ${c.ph != null ? `<div class="text-center"><div class="text-[10px] text-[var(--muted)] uppercase">pH</div><div class="font-bold text-[var(--accent)]">${c.ph}</div></div>` : ''}
+          ${c.ec != null ? `<div class="text-center"><div class="text-[10px] text-[var(--muted)] uppercase">EC</div><div class="font-bold text-[var(--accent-2)]">${c.ec}</div></div>` : ''}
+          ${c.temp != null ? `<div class="text-center"><div class="text-[10px] text-[var(--muted)] uppercase">Temp</div><div class="font-bold text-[var(--warning)]">${c.temp}°</div></div>` : ''}
+          ${c.hum != null ? `<div class="text-center"><div class="text-[10px] text-[var(--muted)] uppercase">Hum</div><div class="font-bold">${c.hum}%</div></div>` : ''}
+          ${c.altura != null ? `<div class="text-center"><div class="text-[10px] text-[var(--muted)] uppercase">Altura</div><div class="font-bold">${c.altura}cm</div></div>` : ''}
+          ${c.agua != null ? `<div class="text-center"><div class="text-[10px] text-[var(--muted)] uppercase">Agua</div><div class="font-bold">${c.agua}L</div></div>` : ''}
+        </div>
+        ${c.nutrientes ? `<div class="text-xs mb-2"><i class="fa-solid fa-flask text-[var(--accent)]"></i> <strong>Nutrientes:</strong> ${c.nutrientes}</div>` : ''}
+        ${c.observaciones ? `<div class="text-xs text-[var(--muted)] italic"><i class="fa-solid fa-comment-dots"></i> ${c.observaciones}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+// ============= COSECHAS =============
+function openCosechaModal() {
+  if (state.cultivos.length === 0) { showToast('Primero registra cultivos', 'warning'); return; }
+  const sel = document.getElementById('coCultivo');
+  sel.innerHTML = state.cultivos.map(c => `<option value="${c.id}">${c.especie} ${c.variedad || ''}</option>`).join('');
+  document.getElementById('coFecha').value = new Date().toISOString().split('T')[0];
+  ['coCantidad','coObs'].forEach(x => document.getElementById(x).value = '');
+  document.getElementById('coDestino').value = 'Venta';
+  document.getElementById('coCalidad').value = 'Excelente';
+  document.getElementById('modalCosecha').classList.add('active');
+}
+
+function saveCosecha() {
+  const cultivoId = document.getElementById('coCultivo').value;
+  const cantidad = parseFloat(document.getElementById('coCantidad').value);
+  if (!cultivoId || !cantidad) { showToast('Cultivo y cantidad obligatorios', 'error'); return; }
+  const data = {
+    cultivoId,
+    fecha: document.getElementById('coFecha').value,
+    cantidad,
+    destino: document.getElementById('coDestino').value,
+    calidad: document.getElementById('coCalidad').value,
+    observaciones: document.getElementById('coObs').value.trim()
+  };
+  state.cosechas.push({ id: uid(), ...data });
+  if (window.saveData) window.saveData();
+  closeModal('modalCosecha');
+  showToast('Cosecha registrada');
+}
+
+function deleteCosecha(id) { if (confirm('¿Eliminar esta cosecha?')) { state.cosechas = state.cosechas.filter(x => x.id !== id); if (window.saveData) window.saveData(); showToast('Cosecha eliminada', 'warning'); } }
+
+function renderCosechas() {
+  const search = (document.getElementById('cosSearch')?.value || '').toLowerCase();
+  let filtered = state.cosechas.filter(c => {
+    const cult = state.cultivos.find(x => x.id === c.cultivoId);
+    return (cult?.especie || '').toLowerCase().includes(search);
+  }).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+  
+  const now = new Date();
+  const monthHarvests = state.cosechas.filter(c => {
+    const d = new Date(c.fecha);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const yearHarvests = state.cosechas.filter(c => new Date(c.fecha).getFullYear() === now.getFullYear());
+  
+  document.getElementById('cosMonthCount').textContent = monthHarvests.length;
+  document.getElementById('cosMonthKg').textContent = monthHarvests.reduce((s,c) => s+c.cantidad, 0).toFixed(1);
+  document.getElementById('cosYearKg').textContent = yearHarvests.reduce((s,c) => s+c.cantidad, 0).toFixed(1);
+  document.getElementById('cosTotal').textContent = state.cosechas.length;
+  
+  const tbody = document.getElementById('cosechasTable');
+  const empty = document.getElementById('cosechasEmpty');
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  
+  tbody.innerHTML = filtered.map(c => {
+    const cult = state.cultivos.find(x => x.id === c.cultivoId);
+    const destBadge = c.destino === 'Venta' ? 'badge-success' : c.destino === 'Autoconsumo' ? 'badge-info' : c.destino === 'Donación' ? 'badge-purple' : 'badge-danger';
+    return `
+      <tr class="table-row border-b border-[var(--border)]">
+        <td class="p-4 text-sm">${formatDate(c.fecha)}</td>
+        <td class="p-4 font-semibold">${cult?.especie || 'Eliminado'} ${cult?.variedad || ''}</td>
+        <td class="p-4 text-center font-bold text-[var(--accent)]">${c.cantidad} kg</td>
+        <td class="p-4 text-center"><span class="badge ${destBadge}">${c.destino}</span></td>
+        <td class="p-4 text-sm text-[var(--muted)]">${c.observaciones || '—'}</td>
+        <td class="p-4 text-center"><button class="btn-danger !p-2" onclick="deleteCosecha('${c.id}')"><i class="fa-solid fa-trash text-xs"></i></button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ============= PROVEEDORES, COMPRAS, VENTAS (originales) =============
 function openSupplierModal(id = null) {
   state.editingId = id;
   if (id) {
@@ -1375,83 +2608,47 @@ function saveSupplier() {
   const name = document.getElementById('sName').value.trim();
   const company = document.getElementById('sCompany').value.trim();
   if (!name || !company) { showToast('Nombre y empresa son obligatorios', 'error'); return; }
-  
-  const data = {
-    name, company,
-    phone: document.getElementById('sPhone').value.trim(),
-    email: document.getElementById('sEmail').value.trim(),
-    address: document.getElementById('sAddress').value.trim(),
-    products: document.getElementById('sProducts').value.trim()
-  };
-  
-  if (state.editingId) {
-    const s = state.suppliers.find(x => x.id === state.editingId);
-    Object.assign(s, data);
-    showToast('Proveedor actualizado');
-  } else {
-    state.suppliers.push({ id: uid(), ...data });
-    showToast('Proveedor registrado');
-  }
+  const data = { name, company, phone: document.getElementById('sPhone').value.trim(), email: document.getElementById('sEmail').value.trim(), address: document.getElementById('sAddress').value.trim(), products: document.getElementById('sProducts').value.trim() };
+  if (state.editingId) { const s = state.suppliers.find(x => x.id === state.editingId); Object.assign(s, data); showToast('Proveedor actualizado'); }
+  else { state.suppliers.push({ id: uid(), ...data }); showToast('Proveedor registrado'); }
   if (window.saveData) window.saveData();
   closeModal('modalSupplier');
 }
 
-function deleteSupplier(id) {
-  const s = state.suppliers.find(x => x.id === id);
-  if (confirm(`¿Eliminar al proveedor "${s.company}"?`)) {
-    state.suppliers = state.suppliers.filter(x => x.id !== id);
-    if (window.saveData) window.saveData();
-    showToast('Proveedor eliminado', 'warning');
-  }
-}
+function deleteSupplier(id) { if (confirm('¿Eliminar este proveedor?')) { state.suppliers = state.suppliers.filter(x => x.id !== id); if (window.saveData) window.saveData(); showToast('Proveedor eliminado', 'warning'); } }
 
 function renderSuppliers() {
-  const search = document.getElementById('supSearch').value.toLowerCase();
-  const filtered = state.suppliers.filter(s => 
-    s.name.toLowerCase().includes(search) || s.company.toLowerCase().includes(search)
-  );
-  
+  const search = (document.getElementById('supSearch')?.value || '').toLowerCase();
+  const filtered = state.suppliers.filter(s => s.name.toLowerCase().includes(search) || s.company.toLowerCase().includes(search));
   const grid = document.getElementById('suppliersGrid');
   const empty = document.getElementById('suppliersEmpty');
-  
-  if (filtered.length === 0) {
-    grid.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
-  }
+  if (filtered.length === 0) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  
-  grid.innerHTML = filtered.map(s => {
-    return `
-      <div class="card p-5">
-        <div class="flex items-start justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[rgba(0,217,126,0.2)] to-[rgba(0,184,212,0.2)] flex items-center justify-center text-[var(--accent)] font-bold text-lg">
-            ${s.company.charAt(0).toUpperCase()}
-          </div>
-          <div class="flex gap-1">
-            <button class="btn-ghost !p-1.5" onclick="openSupplierModal('${s.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
-            <button class="btn-danger !p-1.5" onclick="deleteSupplier('${s.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
-          </div>
-        </div>
-        <h3 class="font-display font-bold text-base mb-0.5">${s.company}</h3>
-        <p class="text-xs text-[var(--muted)] mb-3">${s.name}</p>
-        <div class="space-y-1.5 text-xs">
-          ${s.phone ? `<div class="flex items-center gap-2 text-[var(--muted)]"><i class="fa-solid fa-phone text-[var(--accent)] w-3"></i> ${s.phone}</div>` : ''}
+  grid.innerHTML = filtered.map(s => `
+    <div class="card p-5">
+      <div class="flex items-start justify-between mb-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[rgba(0,217,126,0.2)] to-[rgba(0,184,212,0.2)] flex items-center justify-center text-[var(--accent)] font-bold text-lg">${s.company.charAt(0).toUpperCase()}</div>
+        <div class="flex gap-1">
+          <button class="btn-ghost !p-1.5" onclick="openSupplierModal('${s.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
+          <button class="btn-danger !p-1.5" onclick="deleteSupplier('${s.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
         </div>
       </div>
-    `;
-  }).join('');
+      <h3 class="font-display font-bold text-base mb-0.5">${s.company}</h3>
+      <p class="text-xs text-[var(--muted)] mb-3">${s.name}</p>
+      <div class="space-y-1.5 text-xs">
+        ${s.phone ? `<div class="flex items-center gap-2 text-[var(--muted)]"><i class="fa-solid fa-phone text-[var(--accent)] w-3"></i> ${s.phone}</div>` : ''}
+        ${s.email ? `<div class="flex items-center gap-2 text-[var(--muted)]"><i class="fa-solid fa-envelope text-[var(--accent)] w-3"></i> ${s.email}</div>` : ''}
+        ${s.address ? `<div class="flex items-center gap-2 text-[var(--muted)]"><i class="fa-solid fa-location-dot text-[var(--accent)] w-3"></i> ${s.address}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
 function openPurchaseModal() {
   if (state.products.length === 0) { showToast('Primero registra productos', 'warning'); return; }
-  const prodSelect = document.getElementById('puProduct');
-  prodSelect.innerHTML = state.products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  const supSelect = document.getElementById('puSupplier');
-  supSelect.innerHTML = '<option value="">Sin proveedor</option>' + state.suppliers.map(s => `<option value="${s.id}">${s.company}</option>`).join('');
-  
-  document.getElementById('puQty').value = '';
-  document.getElementById('puPrice').value = '';
+  document.getElementById('puProduct').innerHTML = state.products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  document.getElementById('puSupplier').innerHTML = '<option value="">Sin proveedor</option>' + state.suppliers.map(s => `<option value="${s.id}">${s.company}</option>`).join('');
+  document.getElementById('puQty').value = ''; document.getElementById('puPrice').value = '';
   document.getElementById('puCurrency').value = state.currentCurrency;
   document.getElementById('puDate').value = new Date().toISOString().split('T')[0];
   calcPurchaseTotal();
@@ -1461,62 +2658,45 @@ function openPurchaseModal() {
 function calcPurchaseTotal() {
   const qty = parseFloat(document.getElementById('puQty').value) || 0;
   const price = parseFloat(document.getElementById('puPrice').value) || 0;
-  const cur = document.getElementById('puCurrency').value;
-  document.getElementById('puTotal').textContent = formatMoney(qty * price, cur);
+  document.getElementById('puTotal').textContent = formatMoney(qty * price, document.getElementById('puCurrency').value);
 }
 
 function savePurchase() {
   const productId = document.getElementById('puProduct').value;
-  const supplierId = document.getElementById('puSupplier').value;
   const qty = parseFloat(document.getElementById('puQty').value);
   const price = parseFloat(document.getElementById('puPrice').value);
-  const currency = document.getElementById('puCurrency').value;
-  const date = document.getElementById('puDate').value;
-  
-  if (!productId || !qty || !price || qty <= 0 || price <= 0) { showToast('Completa los campos obligatorios', 'error'); return; }
-  
-  state.purchases.push({ id: uid(), productId, supplierId, qty, price, currency, date: date || new Date().toISOString().split('T')[0] });
+  if (!productId || !qty || !price) { showToast('Completa campos obligatorios', 'error'); return; }
+  state.purchases.push({ id: uid(), productId, supplierId: document.getElementById('puSupplier').value, qty, price, currency: document.getElementById('puCurrency').value, date: document.getElementById('puDate').value });
   const p = state.products.find(x => x.id === productId);
   if (p) p.stock += qty;
-  
   if (window.saveData) window.saveData();
   closeModal('modalPurchase');
-  showToast('Compra registrada · Stock actualizado');
+  showToast('Compra registrada');
 }
 
-function deletePurchase(id) {
-  if (confirm('¿Eliminar este registro de compra?')) {
-    state.purchases = state.purchases.filter(x => x.id !== id);
-    if (window.saveData) window.saveData();
-    showToast('Compra eliminada', 'warning');
-  }
-}
+function deletePurchase(id) { if (confirm('¿Eliminar esta compra?')) { state.purchases = state.purchases.filter(x => x.id !== id); if (window.saveData) window.saveData(); showToast('Compra eliminada', 'warning'); } }
 
 function renderPurchases() {
-  const search = document.getElementById('purSearch').value.toLowerCase();
+  const search = (document.getElementById('purSearch')?.value || '').toLowerCase();
   let filtered = state.purchases.filter(p => {
     const prod = state.products.find(x => x.id === p.productId);
     return (prod?.name || '').toLowerCase().includes(search);
   }).sort((a, b) => new Date(b.date) - new Date(a.date));
-  
   const tbody = document.getElementById('purchasesTable');
   const empty = document.getElementById('purchasesEmpty');
-  
   if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  
   tbody.innerHTML = filtered.map(p => {
     const prod = state.products.find(x => x.id === p.productId);
     const sup = state.suppliers.find(x => x.id === p.supplierId);
-    const total = p.qty * p.price;
     return `
       <tr class="table-row border-b border-[var(--border)]">
         <td class="p-4 text-sm">${formatDate(p.date)}</td>
-        <td class="p-4"><div class="font-semibold">${prod?.name || 'Producto eliminado'}</div></td>
+        <td class="p-4 font-semibold">${prod?.name || 'Eliminado'}</td>
         <td class="p-4 text-sm">${sup?.company || '—'}</td>
         <td class="p-4 text-center font-bold">${p.qty}</td>
         <td class="p-4 text-right">${formatMoney(p.price, p.currency)}</td>
-        <td class="p-4 text-right font-bold text-[var(--accent-2)]">${formatMoney(total, p.currency)}</td>
+        <td class="p-4 text-right font-bold text-[var(--accent-2)]">${formatMoney(p.qty * p.price, p.currency)}</td>
         <td class="p-4 text-center"><button class="btn-danger !p-2" onclick="deletePurchase('${p.id}')"><i class="fa-solid fa-trash text-xs"></i></button></td>
       </tr>
     `;
@@ -1525,11 +2705,8 @@ function renderPurchases() {
 
 function openSaleModal() {
   if (state.products.length === 0) { showToast('Primero registra productos', 'warning'); return; }
-  const prodSelect = document.getElementById('saProduct');
-  prodSelect.innerHTML = state.products.map(p => `<option value="${p.id}">${p.name} — Stock: ${p.stock}</option>`).join('');
-  document.getElementById('saClient').value = '';
-  document.getElementById('saQty').value = '';
-  document.getElementById('saPrice').value = '';
+  document.getElementById('saProduct').innerHTML = state.products.map(p => `<option value="${p.id}">${p.name} — Stock: ${p.stock}</option>`).join('');
+  document.getElementById('saClient').value = ''; document.getElementById('saQty').value = ''; document.getElementById('saPrice').value = '';
   document.getElementById('saCurrency').value = state.currentCurrency;
   document.getElementById('saDate').value = new Date().toISOString().split('T')[0];
   updateSaleStockInfo();
@@ -1550,71 +2727,52 @@ function updateSaleStockInfo() {
 function calcSaleTotal() {
   const qty = parseFloat(document.getElementById('saQty').value) || 0;
   const price = parseFloat(document.getElementById('saPrice').value) || 0;
-  const cur = document.getElementById('saCurrency').value;
-  document.getElementById('saTotal').textContent = formatMoney(qty * price, cur);
+  document.getElementById('saTotal').textContent = formatMoney(qty * price, document.getElementById('saCurrency').value);
 }
 
 function saveSale() {
   const productId = document.getElementById('saProduct').value;
-  const client = document.getElementById('saClient').value.trim();
   const qty = parseFloat(document.getElementById('saQty').value);
   const price = parseFloat(document.getElementById('saPrice').value);
-  const currency = document.getElementById('saCurrency').value;
-  const date = document.getElementById('saDate').value;
-  
-  if (!productId || !qty || !price || qty <= 0 || price <= 0) { showToast('Campos obligatorios', 'error'); return; }
-  
+  if (!productId || !qty || !price) { showToast('Campos obligatorios', 'error'); return; }
   const product = state.products.find(x => x.id === productId);
-  if (product && qty > product.stock) {
-    if (!confirm(`Stock insuficiente. Solo hay ${product.stock} disponibles. ¿Continuar?`)) return;
-  }
-  
-  state.sales.push({ id: uid(), productId, client, qty, price, currency, date: date || new Date().toISOString().split('T')[0] });
+  if (product && qty > product.stock) { if (!confirm(`Stock insuficiente (${product.stock}). ¿Continuar?`)) return; }
+  state.sales.push({ id: uid(), productId, client: document.getElementById('saClient').value.trim(), qty, price, currency: document.getElementById('saCurrency').value, date: document.getElementById('saDate').value });
   if (product) product.stock = Math.max(0, product.stock - qty);
-  
   if (window.saveData) window.saveData();
   closeModal('modalSale');
-  showToast('Venta registrada · Stock actualizado');
+  showToast('Venta registrada');
 }
 
-function deleteSale(id) {
-  if (confirm('¿Eliminar este registro de venta?')) {
-    state.sales = state.sales.filter(x => x.id !== id);
-    if (window.saveData) window.saveData();
-    showToast('Venta eliminada', 'warning');
-  }
-}
+function deleteSale(id) { if (confirm('¿Eliminar esta venta?')) { state.sales = state.sales.filter(x => x.id !== id); if (window.saveData) window.saveData(); showToast('Venta eliminada', 'warning'); } }
 
 function renderSales() {
-  const search = document.getElementById('saleSearch').value.toLowerCase();
+  const search = (document.getElementById('saleSearch')?.value || '').toLowerCase();
   let filtered = state.sales.filter(s => {
     const prod = state.products.find(x => x.id === s.productId);
     return (prod?.name || '').toLowerCase().includes(search);
   }).sort((a, b) => new Date(b.date) - new Date(a.date));
-  
   const tbody = document.getElementById('salesTable');
   const empty = document.getElementById('salesEmpty');
-  
   if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
   empty.classList.add('hidden');
-  
   tbody.innerHTML = filtered.map(s => {
     const prod = state.products.find(x => x.id === s.productId);
-    const total = s.qty * s.price;
     return `
       <tr class="table-row border-b border-[var(--border)]">
         <td class="p-4 text-sm">${formatDate(s.date)}</td>
-        <td class="p-4"><div class="font-semibold">${prod?.name || 'Producto eliminado'}</div></td>
+        <td class="p-4 font-semibold">${prod?.name || 'Eliminado'}</td>
         <td class="p-4 text-sm">${s.client || '—'}</td>
         <td class="p-4 text-center font-bold">${s.qty}</td>
         <td class="p-4 text-right">${formatMoney(s.price, s.currency)}</td>
-        <td class="p-4 text-right font-bold text-[var(--accent)]">${formatMoney(total, s.currency)}</td>
+        <td class="p-4 text-right font-bold text-[var(--accent)]">${formatMoney(s.qty * s.price, s.currency)}</td>
         <td class="p-4 text-center"><button class="btn-danger !p-2" onclick="deleteSale('${s.id}')"><i class="fa-solid fa-trash text-xs"></i></button></td>
       </tr>
     `;
   }).join('');
 }
 
+// ============= CATEGORÍAS =============
 function openCategoryModal() {
   document.getElementById('cName').value = '';
   state.selectedIcon = 'fa-circle';
@@ -1641,11 +2799,7 @@ function saveCategory() {
 
 function deleteCategory(id) {
   if (state.products.filter(p => p.category === id).length > 0) { showToast('No se puede eliminar: en uso', 'error'); return; }
-  if (confirm('¿Eliminar esta categoría?')) {
-    state.categories = state.categories.filter(c => c.id !== id);
-    if (window.saveData) window.saveData();
-    showToast('Categoría eliminada', 'warning');
-  }
+  if (confirm('¿Eliminar esta categoría?')) { state.categories = state.categories.filter(c => c.id !== id); if (window.saveData) window.saveData(); showToast('Categoría eliminada', 'warning'); }
 }
 
 function renderCategories() {
@@ -1661,17 +2815,111 @@ function renderCategories() {
           <button class="btn-danger !p-1.5" onclick="deleteCategory('${c.id}')"><i class="fa-solid fa-trash text-xs"></i></button>
         </div>
         <h3 class="font-display font-bold text-sm mb-1">${c.name}</h3>
-        <div class="text-xs text-[var(--muted)] mb-3">${count} producto(s)</div>
+        <div class="text-xs text-[var(--muted)]">${count} producto(s)</div>
       </div>
     `;
   }).join('');
 }
 
-let chartMov, chartCat;
+// ============= REPORTES =============
+function setReportPeriod(period) {
+  state.reportPeriod = period;
+  document.querySelectorAll('[data-period]').forEach(b => b.classList.toggle('active', b.dataset.period === period));
+  renderReports();
+}
+
+function getDateRange(period) {
+  const now = new Date();
+  let start = new Date(now);
+  if (period === 'day') start = new Date(now);
+  else if (period === 'week') start.setDate(now.getDate() - 7);
+  else if (period === 'month') start.setMonth(now.getMonth(), 1);
+  else if (period === 'year') start.setFullYear(now.getFullYear(), 0, 1);
+  else if (period === 'all') return [new Date(0), now];
+  start.setHours(0, 0, 0, 0);
+  return [start, now];
+}
+
+function renderReports() {
+  const [start, end] = getDateRange(state.reportPeriod);
+  const inRange = (d) => { const dt = new Date(d); return dt >= start && dt <= end; };
+  
+  const sales = state.sales.filter(s => inRange(s.date));
+  const purchases = state.purchases.filter(p => inRange(p.date));
+  const harvests = state.cosechas.filter(c => inRange(c.fecha));
+  
+  const salesTotal = sales.reduce((sum, s) => sum + convertCurrency(s.qty * s.price, s.currency, state.currentCurrency), 0);
+  const purchasesTotal = purchases.reduce((sum, p) => sum + convertCurrency(p.qty * p.price, p.currency, state.currentCurrency), 0);
+  const harvestKg = harvests.reduce((s,c) => s + c.cantidad, 0);
+  const balance = salesTotal - purchasesTotal;
+  
+  const curSymbol = state.currentCurrency === 'PEN' ? 'S/' : '$';
+  document.getElementById('repSales').textContent = curSymbol + ' ' + salesTotal.toLocaleString('es-PE', { maximumFractionDigits: 0 });
+  document.getElementById('repPurchases').textContent = curSymbol + ' ' + purchasesTotal.toLocaleString('es-PE', { maximumFractionDigits: 0 });
+  document.getElementById('repHarvest').textContent = harvestKg.toFixed(1) + ' kg';
+  document.getElementById('repBalance').textContent = curSymbol + ' ' + balance.toLocaleString('es-PE', { maximumFractionDigits: 0 });
+  
+  // Chart 1: Ventas vs Compras por día/semana
+  const ctx1 = document.getElementById('chartReport1').getContext('2d');
+  if (window._chartRep1) window._chartRep1.destroy();
+  
+  const labels = [];
+  const salesData = [];
+  const purchasesData = [];
+  const days = state.reportPeriod === 'year' ? 12 : (state.reportPeriod === 'month' ? 30 : (state.reportPeriod === 'week' ? 7 : 1));
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    if (state.reportPeriod === 'year') {
+      d.setMonth(d.getMonth() - i);
+      d.setDate(1);
+    }
+    const daySales = sales.filter(s => state.reportPeriod === 'year' 
+      ? new Date(s.date).getMonth() === d.getMonth() && new Date(s.date).getFullYear() === d.getFullYear()
+      : new Date(s.date).toDateString() === d.toDateString());
+    const dayPurchases = purchases.filter(p => state.reportPeriod === 'year'
+      ? new Date(p.date).getMonth() === d.getMonth() && new Date(p.date).getFullYear() === d.getFullYear()
+      : new Date(p.date).toDateString() === d.toDateString());
+    
+    labels.push(state.reportPeriod === 'year' ? d.toLocaleDateString('es-PE', { month: 'short' }) : d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' }));
+    salesData.push(daySales.reduce((sum, s) => sum + convertCurrency(s.qty * s.price, s.currency, state.currentCurrency), 0));
+    purchasesData.push(dayPurchases.reduce((sum, p) => sum + convertCurrency(p.qty * p.price, p.currency, state.currentCurrency), 0));
+  }
+  
+  window._chartRep1 = new Chart(ctx1, {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: 'Ventas', data: salesData, backgroundColor: 'rgba(0, 217, 126, 0.7)', borderRadius: 6 },
+      { label: 'Compras', data: purchasesData, backgroundColor: 'rgba(0, 184, 212, 0.7)', borderRadius: 6 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8aae9f' } } }, scales: { x: { ticks: { color: '#8aae9f' }, grid: { color: 'rgba(0,217,126,0.05)' } }, y: { ticks: { color: '#8aae9f' }, grid: { color: 'rgba(0,217,126,0.05)' } } } }
+  });
+  
+  // Chart 2: Producción por especie
+  const ctx2 = document.getElementById('chartReport2').getContext('2d');
+  if (window._chartRep2) window._chartRep2.destroy();
+  
+  const speciesTotals = {};
+  harvests.forEach(h => {
+    const cult = state.cultivos.find(c => c.id === h.cultivoId);
+    const sp = cult?.especie || 'Otro';
+    speciesTotals[sp] = (speciesTotals[sp] || 0) + h.cantidad;
+  });
+  
+  window._chartRep2 = new Chart(ctx2, {
+    type: 'doughnut',
+    data: { labels: Object.keys(speciesTotals), datasets: [{ data: Object.values(speciesTotals), backgroundColor: ['#00d97e', '#00b8d4', '#ffb84d', '#b388ff', '#ff5e6c', '#7cffb3'] }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#8aae9f' } } } }
+  });
+}
+
+// ============= DASHBOARD =============
+let chartMov, chartHarv;
 function renderDashboard() {
   document.getElementById('statTotalProducts').textContent = state.products.length;
-  document.getElementById('statSuppliers').textContent = state.suppliers.length;
-  document.getElementById('statLowStock').textContent = state.products.filter(p => p.stock <= (p.minStock || 0)).length;
+  document.getElementById('statTotalInternal').textContent = state.internalItems.length;
+  document.getElementById('statActiveCrops').textContent = state.cultivos.filter(c => c.etapa !== 'finalizado').length;
   
   const inventoryValue = state.products.reduce((sum, p) => sum + convertCurrency(p.stock * p.price, p.currency, state.currentCurrency), 0);
   const curSymbol = state.currentCurrency === 'PEN' ? 'S/' : '$';
@@ -1680,7 +2928,6 @@ function renderDashboard() {
   const now = new Date();
   const monthSales = state.sales.filter(s => new Date(s.date).getMonth() === now.getMonth());
   const monthPurchases = state.purchases.filter(p => new Date(p.date).getMonth() === now.getMonth());
-  
   const salesTotal = monthSales.reduce((sum, s) => sum + convertCurrency(s.qty * s.price, s.currency, state.currentCurrency), 0);
   const purchasesTotal = monthPurchases.reduce((sum, p) => sum + convertCurrency(p.qty * p.price, p.currency, state.currentCurrency), 0);
   
@@ -1692,23 +2939,63 @@ function renderDashboard() {
   document.getElementById('salesBar').style.width = (salesTotal / maxVal * 100) + '%';
   document.getElementById('purchasesBar').style.width = (purchasesTotal / maxVal * 100) + '%';
   
-  // Gráficos básicos para que funcione el dashboard (simplificados por espacio)
-  const ctxCat = document.getElementById('chartCategories').getContext('2d');
-  if (chartCat) chartCat.destroy();
-  chartCat = new Chart(ctxCat, { type: 'doughnut', data: { labels: ['Activos'], datasets: [{ data: [1], backgroundColor: ['rgba(0, 217, 126, 0.85)'] }] }, options: { responsive: true, maintainAspectRatio: false } });
-
+  // Chart movimientos mensual
+  const ctxMov = document.getElementById('chartMovements').getContext('2d');
+  if (chartMov) chartMov.destroy();
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const salesByMonth = Array(12).fill(0);
+  const purchasesByMonth = Array(12).fill(0);
+  state.sales.forEach(s => { const d = new Date(s.date); if (d.getFullYear() === now.getFullYear()) salesByMonth[d.getMonth()] += convertCurrency(s.qty * s.price, s.currency, state.currentCurrency); });
+  state.purchases.forEach(p => { const d = new Date(p.date); if (d.getFullYear() === now.getFullYear()) purchasesByMonth[d.getMonth()] += convertCurrency(p.qty * p.price, p.currency, state.currentCurrency); });
+  chartMov = new Chart(ctxMov, {
+    type: 'line',
+    data: { labels: months, datasets: [
+      { label: 'Ventas', data: salesByMonth, borderColor: '#00d97e', backgroundColor: 'rgba(0,217,126,0.1)', tension: 0.4, fill: true },
+      { label: 'Compras', data: purchasesByMonth, borderColor: '#00b8d4', backgroundColor: 'rgba(0,184,212,0.1)', tension: 0.4, fill: true }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8aae9f' } } }, scales: { x: { ticks: { color: '#8aae9f' }, grid: { color: 'rgba(0,217,126,0.05)' } }, y: { ticks: { color: '#8aae9f' }, grid: { color: 'rgba(0,217,126,0.05)' } } } }
+  });
+  
+  // Chart cosechas anuales
+  const ctxHarv = document.getElementById('chartHarvest').getContext('2d');
+  if (chartHarv) chartHarv.destroy();
+  const harvestByMonth = Array(12).fill(0);
+  state.cosechas.forEach(c => { const d = new Date(c.fecha); if (d.getFullYear() === now.getFullYear()) harvestByMonth[d.getMonth()] += c.cantidad; });
+  chartHarv = new Chart(ctxHarv, {
+    type: 'bar',
+    data: { labels: months, datasets: [{ label: 'Kg cosechados', data: harvestByMonth, backgroundColor: 'rgba(255, 184, 77, 0.7)', borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#8aae9f' } } }, scales: { x: { ticks: { color: '#8aae9f' }, grid: { color: 'rgba(0,217,126,0.05)' } }, y: { ticks: { color: '#8aae9f' }, grid: { color: 'rgba(0,217,126,0.05)' } } } }
+  });
+  
+  // Stock bajo
   const lowStockList = document.getElementById('lowStockList');
-  const low = state.products.filter(p => p.stock <= (p.minStock || 0)).slice(0, 5);
-  lowStockList.innerHTML = low.length === 0 ? '<div class="text-sm text-center py-4">Todo OK</div>' : low.map(p => `
-    <div class="flex justify-between p-3 bg-[var(--bg-2)] border rounded-lg">
+  const low = state.products.filter(p => p.stock <= (p.minStock || 0)).slice(0, 4);
+  lowStockList.innerHTML = low.length === 0 ? '<div class="text-sm text-center py-4 text-[var(--muted)]">Todo en orden ✅</div>' : low.map(p => `
+    <div class="flex justify-between p-2.5 bg-[var(--bg-2)] border border-[var(--border)] rounded-lg">
       <div class="font-semibold text-sm">${p.name}</div>
-      <div class="font-bold">${p.stock}</div>
+      <div class="font-bold text-[var(--danger)]">${p.stock}</div>
     </div>
   `).join('');
+  
+  // Cultivos activos
+  const activeCropsList = document.getElementById('activeCropsList');
+  const active = state.cultivos.filter(c => c.etapa !== 'finalizado').slice(0, 4);
+  activeCropsList.innerHTML = active.length === 0 ? '<div class="text-sm text-center py-4 text-[var(--muted)]">Sin cultivos activos</div>' : active.map(c => {
+    const days = daysBetween(c.fecha, new Date().toISOString().split('T')[0]);
+    return `
+      <div class="flex justify-between p-2.5 bg-[var(--bg-2)] border border-[var(--border)] rounded-lg">
+        <div>
+          <div class="font-semibold text-sm">${c.especie}</div>
+          <div class="text-xs text-[var(--muted)]">${days} días · ${c.plantas} plantas</div>
+        </div>
+        <span class="stage-indicator ${c.etapa === 'crecimiento' ? 'stage-crecimiento' : c.etapa === 'floracion' ? 'stage-floracion' : 'stage-cosecha'}">${c.etapa}</span>
+      </div>
+    `;
+  }).join('');
 }
 
 function init() {
-  loadData();
+  document.getElementById('ctrlDate').value = new Date().toISOString().split('T')[0];
   document.querySelectorAll('.modal-backdrop').forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); }));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.active').forEach(m => closeModal(m.id)); });
 }
